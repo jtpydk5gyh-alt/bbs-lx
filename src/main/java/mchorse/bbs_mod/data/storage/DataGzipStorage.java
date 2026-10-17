@@ -1,5 +1,8 @@
 package mchorse.bbs_mod.data.storage;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,5 +28,17 @@ public class DataGzipStorage extends DataStorage
     protected OutputStream getOutputStream() throws IOException
     {
         return new GZIPOutputStream(this.storage.getOutputStream());
+    }
+
+    @Override
+    protected File getTarget()
+    {
+        return this.storage.getTarget();
+    }
+
+    @Override
+    protected OutputStream openTarget(File file) throws IOException
+    {
+        return new GZIPOutputStream(new FileOutputStream(file));
     }
 }

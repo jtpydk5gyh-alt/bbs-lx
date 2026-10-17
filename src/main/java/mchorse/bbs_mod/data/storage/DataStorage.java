@@ -5,9 +5,13 @@ import mchorse.bbs_mod.data.types.BaseType;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public abstract class DataStorage implements IDataStorage
 {
@@ -80,10 +84,52 @@ public abstract class DataStorage implements IDataStorage
     @Override
     public void write(BaseType type) throws IOException
     {
-        try (OutputStream outputStream = this.getOutputStream())
+        File target = this.getTarget();
+
+        if (target == null)
         {
-            writeToStream(outputStream, type);
+            try (OutputStream outputStream = this.getOutputStream())
+            {
+                writeToStream(outputStream, type);
+            }
+
+            return;
         }
+
+        File temp = new File(target.getAbsolutePath() + ".tmp");
+
+        try
+        {
+            try (OutputStream outputStream = this.openTarget(temp))
+            {
+                writeToStream(outputStream, type);
+            }
+        }
+        catch (Exception e)
+        {
+            temp.delete();
+
+            throw e;
+        }
+
+        try
+        {
+            Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        }
+        catch (AtomicMoveNotSupportedException e)
+        {
+            Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    protected File getTarget()
+    {
+        return null;
+    }
+
+    protected OutputStream openTarget(File file) throws IOException
+    {
+        return this.getOutputStream();
     }
 
     protected abstract OutputStream getOutputStream() throws IOException;
