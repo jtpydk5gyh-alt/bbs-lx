@@ -324,7 +324,7 @@ public class MapType extends BaseType implements Iterable<Map.Entry<String, Base
     {
         this.elements.clear();
 
-        for (int i = 0, count = context.in.readInt(); i < count; i++)
+        for (int i = 0, count = DataStorageContext.readLength(context.in); i < count; i++)
         {
             String key = context.readKey();
             BaseType value = BaseType.fromData(context);

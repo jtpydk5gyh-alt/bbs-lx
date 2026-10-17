@@ -121,25 +121,23 @@ public class ServerNetwork
 
         crusher.receive(buf, (bytes, packetByteBuf) ->
         {
+            if (!(DataStorageUtils.readFromBytes(bytes) instanceof MapType data))
+            {
+                return;
+            }
+
             BlockPos pos = buf.readBlockPos();
 
-            try
+            server.execute(() ->
             {
-                MapType data = (MapType) DataStorageUtils.readFromBytes(bytes);
+                World world = player.getWorld();
+                BlockEntity be = world.getBlockEntity(pos);
 
-                server.execute(() ->
+                if (be instanceof ModelBlockEntity modelBlock)
                 {
-                    World world = player.getWorld();
-                    BlockEntity be = world.getBlockEntity(pos);
-
-                    if (be instanceof ModelBlockEntity modelBlock)
-                    {
-                        modelBlock.updateForm(data, world);
-                    }
-                });
-            }
-            catch (Exception e)
-            {}
+                    modelBlock.updateForm(data, world);
+                }
+            });
         });
     }
 
@@ -152,22 +150,20 @@ public class ServerNetwork
 
         crusher.receive(buf, (bytes, packetByteBuf) ->
         {
-            try
+            if (!(DataStorageUtils.readFromBytes(bytes) instanceof MapType data))
             {
-                MapType data = (MapType) DataStorageUtils.readFromBytes(bytes);
-
-                server.execute(() ->
-                {
-                    ItemStack stack = player.getEquippedStack(EquipmentSlot.MAINHAND).copy();
-
-                    if (stack.getItem() == BBSMod.MODEL_BLOCK_ITEM) stack.getNbt().getCompound("BlockEntityTag").put("Properties", DataStorageUtils.toNbt(data));
-                    else if (stack.getItem() == BBSMod.GUN_ITEM) stack.getOrCreateNbt().put("GunData", DataStorageUtils.toNbt(data));
-
-                    player.equipStack(EquipmentSlot.MAINHAND, stack);
-                });
+                return;
             }
-            catch (Exception e)
-            {}
+
+            server.execute(() ->
+            {
+                ItemStack stack = player.getEquippedStack(EquipmentSlot.MAINHAND).copy();
+
+                if (stack.getItem() == BBSMod.MODEL_BLOCK_ITEM) stack.getNbt().getCompound("BlockEntityTag").put("Properties", DataStorageUtils.toNbt(data));
+                else if (stack.getItem() == BBSMod.GUN_ITEM) stack.getOrCreateNbt().put("GunData", DataStorageUtils.toNbt(data));
+
+                player.equipStack(EquipmentSlot.MAINHAND, stack);
+            });
         });
     }
 
