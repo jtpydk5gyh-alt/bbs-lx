@@ -6,6 +6,7 @@ import mchorse.bbs_mod.l10n.keys.IKey;
 import mchorse.bbs_mod.settings.values.core.ValueGroup;
 import mchorse.bbs_mod.ui.UIKeys;
 import mchorse.bbs_mod.ui.dashboard.panels.UIDataDashboardPanel;
+import mchorse.bbs_mod.ui.framework.elements.overlay.UIOverlay;
 import mchorse.bbs_mod.ui.utils.UIUtils;
 import mchorse.bbs_mod.ui.utils.icons.Icons;
 
@@ -29,6 +30,22 @@ public class UIDataOverlayPanel <T extends ValueGroup> extends UICRUDOverlayPane
             if (this.panel.getData() != null)
             {
                 menu.action(Icons.COPY, UIKeys.PANELS_CONTEXT_COPY, this::copy);
+
+                menu.action(Icons.UNDO, UIKeys.PANELS_CONTEXT_BACKUPS, () ->
+                {
+                    UIOverlay.addOverlay(this.getContext(), new UIBackupsOverlayPanel(
+                        UIKeys.PANELS_MODALS_BACKUPS_TITLE,
+                        this.panel.getType().getRepository(),
+                        this.panel.getData().getId(),
+                        (restored) ->
+                        {
+                            if (restored)
+                            {
+                                this.panel.requestData(this.panel.getData().getId());
+                            }
+                        }
+                    ), 250, 180);
+                });
             }
 
             try
