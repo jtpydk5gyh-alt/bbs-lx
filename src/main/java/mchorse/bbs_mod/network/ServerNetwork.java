@@ -39,6 +39,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
+import org.slf4j.Logger;
+import com.mojang.logging.LogUtils;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -50,6 +52,8 @@ import java.util.UUID;
 
 public class ServerNetwork
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     public static final int STATE_TRIGGER_MORPH = 0;
     public static final int STATE_TRIGGER_MAIN_HAND_ITEM = 1;
     public static final int STATE_TRIGGER_OFF_HAND_ITEM = 2;
@@ -121,7 +125,7 @@ public class ServerNetwork
 
         crusher.receive(buf, (bytes, packetByteBuf) ->
         {
-            if (!(DataStorageUtils.readFromBytes(bytes) instanceof MapType data))
+            if (!(deserialize(bytes) instanceof MapType data))
             {
                 return;
             }
@@ -150,7 +154,7 @@ public class ServerNetwork
 
         crusher.receive(buf, (bytes, packetByteBuf) ->
         {
-            if (!(DataStorageUtils.readFromBytes(bytes) instanceof MapType data))
+            if (!(deserialize(bytes) instanceof MapType data))
             {
                 return;
             }
@@ -197,6 +201,20 @@ public class ServerNetwork
                 sendMorphToTracked(player, finalForm);
             });
         });
+    }
+
+    private static BaseType deserialize(byte[] bytes)
+    {
+        try
+        {
+            return DataStorageUtils.readFromBytes(bytes);
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Received a payload that is not a BBS1 stream", e);
+
+            return null;
+        }
     }
 
     private static void handleManagerDataPacket(MinecraftServer server, ServerPlayerEntity player, PacketByteBuf buf)
@@ -465,6 +483,11 @@ public class ServerNetwork
 
             BaseType data = DataStorageUtils.readFromBytes(bytes);
 
+            if (data == null)
+            {
+                return;
+            }
+
             server.execute(() ->
             {
                 BBSMod.getActions().syncData(filmId, new DataPath(path), data);
@@ -548,6 +571,11 @@ public class ServerNetwork
 
     private static void handleZoomPacket(MinecraftServer server, ServerPlayerEntity player, PacketByteBuf buf)
     {
+        if (!PermissionUtils.arePanelsAllowed(server, player))
+        {
+            return;
+        }
+
         boolean zoom = buf.readBoolean();
         ItemStack main = player.getMainHandStack();
 
@@ -558,26 +586,34 @@ public class ServerNetwork
 
             if (!command.isEmpty())
             {
-                server.getCommandManager().executeWithPrefix(player.getCommandSource(), command);
+                server.execute(() -> server.getCommandManager().executeWithPrefix(player.getCommandSource(), command));
             }
         }
     }
 
     private static void handlePauseFilmPacket(MinecraftServer server, ServerPlayerEntity player, PacketByteBuf buf)
     {
+        if (!PermissionUtils.arePanelsAllowed(server, player))
+        {
+            return;
+        }
+
         String filmId = buf.readString();
 
-        ActionPlayer actionPlayer = BBSMod.getActions().getPlayer(filmId);
-
-        if (actionPlayer != null)
+        server.execute(() ->
         {
-            actionPlayer.toggle();
-        }
+            ActionPlayer actionPlayer = BBSMod.getActions().getPlayer(filmId);
 
-        for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList())
-        {
-            sendPauseFilm(playerEntity, filmId);
-        }
+            if (actionPlayer != null)
+            {
+                actionPlayer.toggle();
+            }
+
+            for (ServerPlayerEntity playerEntity : server.getPlayerManager().getPlayerList())
+            {
+                sendPauseFilm(playerEntity, filmId);
+            }
+        });
     }
 
     /* API */

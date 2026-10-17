@@ -1,5 +1,7 @@
 package mchorse.bbs_mod.data.storage;
 
+import mchorse.bbs_mod.data.types.BaseType;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,5 +33,17 @@ public class DataFileStorage extends DataStorage
     protected OutputStream getOutputStream() throws IOException
     {
         return new FileOutputStream(this.file);
+    }
+
+    @Override
+    protected File getTarget()
+    {
+        return this.file;
+    }
+
+    @Override
+    protected OutputStream openTarget(File file) throws IOException
+    {
+        return new FileOutputStream(file);
     }
 }

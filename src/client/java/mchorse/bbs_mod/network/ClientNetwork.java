@@ -157,7 +157,14 @@ public class ClientNetwork
         crusher.receive(buf, (bytes, packetByteBuf) ->
         {
             int callbackId = packetByteBuf.readInt();
-            RepositoryOperation op = RepositoryOperation.values()[packetByteBuf.readInt()];
+            int operation = packetByteBuf.readInt();
+            RepositoryOperation[] operations = RepositoryOperation.values();
+
+            if (operation < 0 || operation >= operations.length)
+            {
+                return;
+            }
+
             BaseType data = DataStorageUtils.readFromBytes(bytes);
 
             client.execute(() ->
