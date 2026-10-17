@@ -4,10 +4,23 @@ If you'd like to submit a PR (pull request) to this repository, please carefully
 
 These rules might feel tyrannical, but these rules ensure that the project stays maintainable for future years! The source code will turn into unmaintainable slop who will never support ever again (these rules weren't enforced in Blockbuster mod, and look what happened: it was abandoned).
 
+This is a fork of [BBS mod](https://github.com/mchorse/bbs-mod). Upstream is archived, so pull requests go here and not there. See [README.md](README.md) for what that means.
+
 ## General principles
 
-* No pure AI code (AI code is allowed as long as you adapted it, understood it, and tested it)!
-* No changes to `gradle` config (i.e. `gradle/`, `gradlew`, `gradlew.bat`, `gradle.properties`, and `build.gradle`)!
+* No changes to `gradle` config (i.e. `gradle/`, `gradlew`, `gradlew.bat`, `gradle.properties`, and `build.gradle`), unless the pull request description explains why on a line starting with `gradle-justification:`. The CI rejects it otherwise.
+* **Write your own code.** Taking an idea or a behaviour from another fork is fine. Copying its methods or classes, or cherry-picking its commits, is not. If a change comes from somewhere else, say so in the description and reimplement it here.
+* **A user's data cannot be regenerated.** Films, models, keyframes, form ids, the `bbs` namespace and the `config/bbs` folder are on a player's disk and nowhere else. Any change that alters a saved format needs a migration and compatibility tests, and that is a design discussion before it is a patch.
+
+## What you must not break
+
+The mod declares `"environment": "*"`, so it runs on other people's servers and clients. A change that looks local can break someone else's world.
+
+* **`src/main` is common code, `src/client` is client only.** A reference from common to client code crashes on a dedicated server, and the build will not tell you.
+* **The network is client to server.** A new packet without a version bump cuts the connection of older clients already connected.
+* **Mixins and the access widener are fragile.** They target internal Minecraft classes. A change there only shows up in game, never in a build.
+* **The `bbs` namespace is part of the saved format.** It is written into the `type` field of every clip in every film. Renaming it makes resolution fail, the clip is dropped silently, and the film still opens with something missing. If it ever has to change, it needs an alias.
+* **`config/bbs` does not move.** It is hardcoded, not derived from the mod id, which is exactly why changing it would take everyone's work with it.
 
 ## Code style
 
@@ -81,3 +94,27 @@ Here we have:
 * All comments in the body of the code must be within `/* ... */` and never with `//`.
 * Self-explanatory comments must be avoided.
 * JavaDocs comments must be present only above the method or class definition, but prior to any **annotations**!
+
+## Pull requests
+
+`main` is protected: nothing reaches it except through a pull request, not even a maintainer.
+
+Every pull request has to explain three things, and the CI enforces the rest:
+
+1. **The problem.** What is wrong or missing, and why it matters.
+2. **The change.** What you did, and what you deliberately did not do.
+3. **The verification.** The exact commands you ran and what they printed.
+
+Before it can be merged, `build`, `public surface` and `gradle config untouched` all have to be green.
+
+**Say what you could not check.** This mod touches rendering, keyboard, mixins and networking, and a green build only proves the Java parses. If you did not open Minecraft and see it work, write that it was not checked and say what would be needed. A pull request that claims "works" without that evidence gets rejected, because the claim is indistinguishable from a guess.
+
+Commits are small, coherent and in English, with a conventional subject:
+
+```text
+fix(forms): no dibujar la punta cuando el grosor es cero
+feat(panel): agrupar los ajustes por forma y no por tipo
+refactor(film): extraer el cálculo de eased value a FilmUtils
+```
+
+One commit, one reason. Branch from `main`.
