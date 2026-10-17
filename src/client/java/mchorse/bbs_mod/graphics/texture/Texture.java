@@ -38,11 +38,20 @@ public class Texture
 
         ByteBuffer buffer = MemoryUtil.memAlloc(texture.width * texture.height * 4);
 
-        texture.bind();
-        GL11.glGetTexImage(texture.target, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
-        texture.unbind();
+        try
+        {
+            texture.bind();
+            GL11.glGetTexImage(texture.target, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
+            texture.unbind();
 
-        return new Pixels(buffer, texture.width, texture.height);
+            return new Pixels(buffer, texture.width, texture.height);
+        }
+        catch (Exception e)
+        {
+            MemoryUtil.memFree(buffer);
+
+            return null;
+        }
     }
 
     public static Texture textureFromPixels(Pixels pixels, int filter)
