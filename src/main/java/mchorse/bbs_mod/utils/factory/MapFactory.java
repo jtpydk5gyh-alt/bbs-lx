@@ -44,12 +44,12 @@ public class MapFactory <T, D> implements IFactory<T, D>
         return this;
     }
 
-    public MapFactory<T, D> unregister(String key)
+    public MapFactory<T, D> unregister(Link key)
     {
         Class<? extends T> clazz = this.factory.remove(key);
 
         this.factoryInverse.remove(clazz);
-        this.data.remove(clazz);
+        this.data.remove(key);
 
         return this;
     }
@@ -87,17 +87,19 @@ public class MapFactory <T, D> implements IFactory<T, D>
     {
         Class<? extends T> clazz = this.factory.get(type);
 
-        if (clazz != null)
+        if (clazz == null)
         {
-            try
-            {
-                return clazz.getConstructor().newInstance();
-            }
-            catch (Exception e)
-            {}
+            throw new IllegalStateException("Object type " + type + " is not part of this factory!");
         }
 
-        throw new IllegalStateException("Object type " + type + " is not part of this factory!");
+        try
+        {
+            return clazz.getConstructor().newInstance();
+        }
+        catch (Exception e)
+        {
+            throw new IllegalStateException("Object type " + type + " is registered but could not be created", e);
+        }
     }
 
     @Override
