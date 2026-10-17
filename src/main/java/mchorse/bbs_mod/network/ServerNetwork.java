@@ -42,6 +42,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -267,6 +268,36 @@ public class ServerNetwork
             else if (op == RepositoryOperation.DELETE_FOLDER)
             {
                 sendManagerData(player, callbackId, op, new ByteType(films.deleteFolder(data.getString("folder"))));
+            }
+            else if (op == RepositoryOperation.BACKUPS)
+            {
+                List<File> backups = films.getBackups(data.getString("id"));
+                List<String> names = new ArrayList<>();
+
+                for (File file : backups)
+                {
+                    names.add(file.getName());
+                }
+
+                sendManagerData(player, callbackId, op, DataStorageUtils.stringListToData(names));
+            }
+            else if (op == RepositoryOperation.RESTORE_BACKUP)
+            {
+                String id = data.getString("id");
+                String name = data.getString("backup");
+                File found = null;
+
+                for (File file : films.getBackups(id))
+                {
+                    if (file.getName().equals(name))
+                    {
+                        found = file;
+
+                        break;
+                    }
+                }
+
+                sendManagerData(player, callbackId, op, new ByteType(found != null && films.restoreBackup(id, found)));
             }
         });
     }

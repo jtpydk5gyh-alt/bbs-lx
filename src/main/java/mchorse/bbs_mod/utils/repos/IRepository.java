@@ -35,4 +35,10 @@ public interface IRepository<T extends IDataSerializable>
     public void renameFolder(String path, String name, Consumer<Boolean> callback);
 
     public void deleteFolder(String path, Consumer<Boolean> callback);
+
+    /* Backups */
+
+    public void requestBackups(String id, Consumer<Collection<String>> callback);
+
+    public void restoreBackup(String id, String backup, Consumer<Boolean> callback);
 }
