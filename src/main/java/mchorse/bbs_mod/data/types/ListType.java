@@ -343,7 +343,7 @@ public class ListType extends BaseType implements Iterable<BaseType>
     {
         this.elements.clear();
 
-        for (int i = 0, count = context.in.readInt(); i < count; i++)
+        for (int i = 0, count = DataStorageContext.readLength(context.in); i < count; i++)
         {
             BaseType type = BaseType.fromData(context);
 
