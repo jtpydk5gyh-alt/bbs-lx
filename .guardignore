@@ -1,0 +1,12 @@
+# Ficheros que el guardián no lee.
+#
+# Una ruta por línea, relativa a la raíz del repositorio. Las líneas en blanco
+# y las que empiezan por # se ignoran.
+#
+# Este fichero existe para que un falso positivo tenga una respuesta que no sea
+# editar la regla ni usar --no-verify. Si algo aparece aquí, tiene un motivo
+# escrito justo debajo.
+#
+# --- entradas ---
+#
+# (ninguna por ahora)
