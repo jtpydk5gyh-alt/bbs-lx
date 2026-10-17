@@ -17,6 +17,8 @@ import java.util.function.Consumer;
 public abstract class PacketCrusher
 {
     public static final int BUFFER_SIZE = 30_000;
+    public static final int MAX_CHUNKS = 256;
+    public static final int MAX_PENDING = 16;
 
     private Map<Integer, ByteArrayOutputStream> chunks = new HashMap<>();
     private int counter;
@@ -33,6 +35,22 @@ public abstract class PacketCrusher
         int index = buf.readInt();
         int total = buf.readInt();
         int size = buf.readInt();
+
+        if (size < 0 || size > BUFFER_SIZE || size > buf.readableBytes())
+        {
+            return;
+        }
+
+        if (total < 1 || total > MAX_CHUNKS || index < 0 || index >= total)
+        {
+            return;
+        }
+
+        if (!this.chunks.containsKey(id) && this.chunks.size() >= MAX_PENDING)
+        {
+            return;
+        }
+
         byte[] bytes = new byte[size];
 
         buf.readBytes(bytes);
@@ -50,8 +68,9 @@ public abstract class PacketCrusher
                 finalBytes = null;
             }
 
-            receiver.receiveBuffer(finalBytes, buf);
             this.chunks.remove(id);
+
+            receiver.receiveBuffer(finalBytes, buf);
         }
     }
 

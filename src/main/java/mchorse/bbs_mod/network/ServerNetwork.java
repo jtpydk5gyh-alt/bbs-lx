@@ -211,9 +211,21 @@ public class ServerNetwork
 
         crusher.receive(buf, (bytes, packetByteBuf) ->
         {
-            MapType data = (MapType) DataStorageUtils.readFromBytes(bytes);
+            if (!(DataStorageUtils.readFromBytes(bytes) instanceof MapType data))
+            {
+                return;
+            }
+
             int callbackId = packetByteBuf.readInt();
-            RepositoryOperation op = RepositoryOperation.values()[packetByteBuf.readInt()];
+            int operation = packetByteBuf.readInt();
+            RepositoryOperation[] operations = RepositoryOperation.values();
+
+            if (operation < 0 || operation >= operations.length)
+            {
+                return;
+            }
+
+            RepositoryOperation op = operations[operation];
             FilmManager films = BBSMod.getFilms();
 
             if (op == RepositoryOperation.LOAD)
@@ -221,7 +233,10 @@ public class ServerNetwork
                 String id = data.getString("id");
                 Film film = films.load(id);
 
-                sendManagerData(player, callbackId, op, film.toData());
+                if (film != null)
+                {
+                    sendManagerData(player, callbackId, op, film.toData());
+                }
             }
             else if (op == RepositoryOperation.SAVE)
             {
@@ -478,10 +493,19 @@ public class ServerNetwork
 
     private static void handleSharedFormPacket(MinecraftServer server, ServerPlayerEntity player, PacketByteBuf buf)
     {
+        if (!PermissionUtils.arePanelsAllowed(server, player))
+        {
+            return;
+        }
+
         crusher.receive(buf, (bytes, packetByteBuf) ->
         {
             UUID playerUuid = packetByteBuf.readUuid();
-            MapType data = (MapType) DataStorageUtils.readFromBytes(bytes);
+
+            if (!(DataStorageUtils.readFromBytes(bytes) instanceof MapType data))
+            {
+                return;
+            }
 
             server.execute(() ->
             {
