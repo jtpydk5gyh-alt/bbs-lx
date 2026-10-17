@@ -28,11 +28,13 @@ public abstract class UIDataDashboardPanel <T extends ValueGroup> extends UICRUD
 
     private Timer savingTimer = new Timer(0);
 
+    private boolean unsaved;
+
     public UIDataDashboardPanel(UIDashboard dashboard)
     {
         super(dashboard);
 
-        this.saveIcon = new UIIcon(Icons.SAVED, (b) -> this.save());
+        this.saveIcon = new UIIcon(() -> this.unsaved ? Icons.SAVE : Icons.SAVED, (b) -> this.saveIfPossible());
 
         this.iconBar.add(this.saveIcon);
 
@@ -78,7 +80,13 @@ public abstract class UIDataDashboardPanel <T extends ValueGroup> extends UICRUD
     {
         this.data = data;
 
-        this.saveIcon.setEnabled(data != null);
+        if (data != null)
+        {
+            data.postCallback((value, flag) -> this.unsaved = true);
+        }
+
+        this.unsaved = false;
+
         this.editor.setVisible(data != null);
         this.overlay.dupe.setEnabled(data != null);
         this.overlay.rename.setEnabled(data != null);
@@ -129,9 +137,21 @@ public abstract class UIDataDashboardPanel <T extends ValueGroup> extends UICRUD
         }
     }
 
+    public void saveIfPossible()
+    {
+        UIContext context = this.getContext();
+
+        if (this.data != null && context != null && this.canSave(context))
+        {
+            this.save();
+        }
+    }
+
     public void forceSave()
     {
         this.getType().getRepository().save(this.data.getId(), this.data.toData().asMap());
+
+        this.unsaved = false;
     }
 
     @Override
@@ -158,6 +178,8 @@ public abstract class UIDataDashboardPanel <T extends ValueGroup> extends UICRUD
     @Override
     public void render(UIContext context)
     {
+        this.saveIcon.setEnabled(this.data != null && this.canSave(context));
+
         if (this.data == null)
         {
             double ticks = context.getTickTransition() % 15D;
