@@ -35,17 +35,20 @@ public abstract class FolderManager <T extends ValueGroup> implements IManager<T
     @Override
     public boolean exists(String name)
     {
-        return this.getFile(name).exists();
+        File file = this.getFile(name);
+
+        return file != null && file.exists();
     }
 
     @Override
     public boolean rename(String from, String to)
     {
         File file = this.getFile(from);
+        File target = this.getFile(to);
 
-        if (file != null && file.exists())
+        if (file != null && target != null && file.exists())
         {
-            if (file.renameTo(this.getFile(to)))
+            if (file.renameTo(target))
             {
                 return true;
             }
@@ -69,7 +72,7 @@ public abstract class FolderManager <T extends ValueGroup> implements IManager<T
     {
         File folder = this.getFolder(this.normalizePath(path));
 
-        if (folder.exists())
+        if (folder == null || folder.exists())
         {
             return false;
         }
@@ -86,10 +89,11 @@ public abstract class FolderManager <T extends ValueGroup> implements IManager<T
         to = this.normalizePath(to);
 
         File folder = this.getFolder(from);
+        File target = this.getFolder(to);
 
-        if (folder.isDirectory())
+        if (folder != null && target != null && folder.isDirectory())
         {
-            if (folder.renameTo(this.getFolder(to)))
+            if (folder.renameTo(target))
             {
                 return true;
             }
@@ -105,7 +109,7 @@ public abstract class FolderManager <T extends ValueGroup> implements IManager<T
     {
         File folder = this.getFolder(this.normalizePath(path));
 
-        if (folder.isDirectory())
+        if (folder != null && folder.isDirectory())
         {
             if (folder.delete())
             {
@@ -174,7 +178,9 @@ public abstract class FolderManager <T extends ValueGroup> implements IManager<T
             return null;
         }
 
-        return new File(this.getFolder(), name + this.getExtension());
+        File root = this.getFolder();
+
+        return this.inside(root, new File(root, name + this.getExtension()));
     }
 
     public File getFolder(String path)
@@ -184,7 +190,24 @@ public abstract class FolderManager <T extends ValueGroup> implements IManager<T
             return null;
         }
 
-        return new File(this.getFolder(), path);
+        File root = this.getFolder();
+
+        return this.inside(root, new File(root, path));
+    }
+
+    private File inside(File root, File file)
+    {
+        try
+        {
+            String parent = root.getCanonicalPath();
+            String child = file.getCanonicalPath();
+
+            return child.equals(parent) || child.startsWith(parent + File.separator) ? file : null;
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 
     protected String getExtension()
