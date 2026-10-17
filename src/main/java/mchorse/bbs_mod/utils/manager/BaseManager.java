@@ -43,9 +43,16 @@ public abstract class BaseManager <T extends ValueGroup> extends FolderManager<T
     @Override
     public T load(String id)
     {
+        File file = this.getFile(id);
+
+        if (file == null)
+        {
+            return null;
+        }
+
         try
         {
-            MapType mapType = this.storage.load(this.getFile(id));
+            MapType mapType = this.storage.load(file);
             T data = this.create(id, mapType);
 
             return data;
@@ -62,6 +69,11 @@ public abstract class BaseManager <T extends ValueGroup> extends FolderManager<T
     public boolean save(String id, MapType data)
     {
         File file = this.getFile(id);
+
+        if (file == null)
+        {
+            return false;
+        }
 
         try
         {
