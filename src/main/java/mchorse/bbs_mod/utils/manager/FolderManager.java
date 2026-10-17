@@ -1,6 +1,7 @@
 package mchorse.bbs_mod.utils.manager;
 
 import mchorse.bbs_mod.settings.values.core.ValueGroup;
+import mchorse.bbs_mod.utils.IOUtils;
 
 import java.io.File;
 import java.util.Collection;
@@ -179,8 +180,9 @@ public abstract class FolderManager <T extends ValueGroup> implements IManager<T
         }
 
         File root = this.getFolder();
+        File file = new File(root, name + this.getExtension());
 
-        return this.inside(root, new File(root, name + this.getExtension()));
+        return IOUtils.inside(root, file) ? file : null;
     }
 
     public File getFolder(String path)
@@ -191,23 +193,9 @@ public abstract class FolderManager <T extends ValueGroup> implements IManager<T
         }
 
         File root = this.getFolder();
+        File file = new File(root, path);
 
-        return this.inside(root, new File(root, path));
-    }
-
-    private File inside(File root, File file)
-    {
-        try
-        {
-            String parent = root.getCanonicalPath();
-            String child = file.getCanonicalPath();
-
-            return child.equals(parent) || child.startsWith(parent + File.separator) ? file : null;
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
+        return IOUtils.inside(root, file) ? file : null;
     }
 
     protected String getExtension()

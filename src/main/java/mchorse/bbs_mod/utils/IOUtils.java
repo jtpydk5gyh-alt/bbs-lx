@@ -79,6 +79,21 @@ public class IOUtils
         }
     }
 
+    public static boolean inside(File root, File file)
+    {
+        try
+        {
+            String parent = root.getCanonicalPath();
+            String child = file.getCanonicalPath();
+
+            return child.equals(parent) || child.startsWith(parent + File.separator);
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+
     /**
      * Read all lines from a file (needs a text file) 
      */
