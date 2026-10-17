@@ -35,7 +35,7 @@ public class ByteArrayType extends BaseType
     @Override
     public void read(DataStorageContext context) throws IOException
     {
-        int c = context.in.readInt();
+        int c = DataStorageContext.readLength(context.in);
         this.value = new byte[c];
 
         int counter = 0;

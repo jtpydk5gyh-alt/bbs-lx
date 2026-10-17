@@ -35,7 +35,7 @@ public class ShortArrayType extends BaseType
     @Override
     public void read(DataStorageContext context) throws IOException
     {
-        int c = context.in.readInt();
+        int c = DataStorageContext.readLength(context.in);
         this.value = new short[c];
 
         byte[] bytes = new byte[c * 2];
