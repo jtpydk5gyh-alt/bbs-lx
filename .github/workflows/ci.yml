@@ -1,0 +1,112 @@
+name: build
+
+# `main` is not pushed to directly: everything arrives through a pull request.
+# This workflow is the check that makes that true.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: temurin
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Full build: compile + remapJar + sourcesJar. It proves the Java is
+      # valid. It does not prove the mod works in game.
+      - name: Build
+        run: ./gradlew build --stacktrace
+
+      - name: Upload jars
+        uses: actions/upload-artifact@v4
+        with:
+          name: bbs-lx-jars
+          path: build/libs/*.jar
+          if-no-files-found: error
+
+  public-surface:
+    name: public surface
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The pull request description is public the moment it is written, and so
+      # is every committed file.
+      - name: Guard the pull request description
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s' "$PR_BODY" > "$RUNNER_TEMP/pr-body.txt"
+          python scripts/guard_public.py --pr-body "$RUNNER_TEMP/pr-body.txt"
+
+      - name: Guard the committed files
+        run: python scripts/guard_public.py --all
+
+  gradle-config:
+    name: gradle config untouched
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Upstream's CONTRIBUTING.md forbids touching the build configuration.
+      # It is allowed here, but only in a pull request that says why.
+      - name: Check for Gradle config changes without justification
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+          base="${{ github.event.pull_request.base.ref || 'main' }}"
+          changed=$(git diff --name-only "origin/$base"...HEAD || true)
+          gradle_files=$(printf '%s\n' "$changed" | grep -E \
+            '^(gradle/|gradlew$|gradlew\.bat$|gradle\.properties$|build\.gradle$|settings\.gradle$)' || true)
+
+          if [ -z "$gradle_files" ]; then
+            echo "No Gradle config changed. OK."
+            exit 0
+          fi
+
+          # Read from the event payload, not from gh: no token, no network, and
+          # a body that cannot be fetched must never look like "no justification".
+          if [ -z "${PR_BODY:-}" ]; then
+            echo "::error::Could not read the pull request body, so the justification cannot be checked."
+            echo "::error::Re-run this check once the PR description is filled in."
+            exit 1
+          fi
+
+          if printf '%s' "$PR_BODY" | grep -q 'gradle-justification:'; then
+            echo "Gradle config changed and the PR carries 'gradle-justification:'. OK."
+            printf 'Changed:\n%s\n' "$gradle_files"
+            exit 0
+          fi
+
+          echo "::error::This PR changes the Gradle configuration:"
+          printf '%s\n' "$gradle_files"
+          echo "::error::Upstream's CONTRIBUTING.md forbids it. It is allowed only if the"
+          echo "::error::PR description explains why, on a line starting with:"
+          echo "::error::gradle-justification: <why>"
+          exit 1

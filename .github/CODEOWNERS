@@ -1,0 +1,11 @@
+# Owner review is required on everything.
+* @jtpydk5gyh-alt
+
+# The build contract: any change here is a change to how everyone builds.
+/.github/workflows/     @jtpydk5gyh-alt
+/build.gradle          @jtpydk5gyh-alt
+/gradle.properties     @jtpydk5gyh-alt
+/gradle/               @jtpydk5gyh-alt
+
+# The style contract, inherited from upstream and left untouched.
+/CONTRIBUTING.md      @jtpydk5gyh-alt

@@ -1,0 +1,35 @@
+version: 2
+
+updates:
+  # Fabric API, Yarn, Sodium, Iris, Loom — the moving parts of a Fabric mod.
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels: [dependencies, gradle]
+    # gradle.properties and build.gradle are protected: a version bump there
+    # needs the "gradle-justification:" line in the PR body, which the
+    # gradle-config check enforces.
+    commit-message:
+      prefix: build
+      prefix-development: build
+    groups:
+      fabric:
+        patterns:
+          - "*fabric*"
+          - "*minecraft*"
+          - "*yarn*"
+      render:
+        patterns:
+          - "*sodium*"
+          - "*iris*"
+          - "*indium*"
+          - "*glsl*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels: [dependencies, ci]
