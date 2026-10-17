@@ -8,6 +8,8 @@ import java.util.Map;
 
 public class DataStorageContext
 {
+    public static final int MAX_ELEMENTS = 1 << 24;
+
     public final DataInputStream in;
     public final DataOutputStream out;
 
@@ -15,6 +17,18 @@ public class DataStorageContext
     private Map<Integer, String> intMap;
     private int index;
     private KeyType type = KeyType.BYTE;
+
+    public static int readLength(DataInputStream in) throws IOException
+    {
+        int length = in.readInt();
+
+        if (length < 0 || length > MAX_ELEMENTS)
+        {
+            throw new IOException("Refusing to read " + length + " elements, the limit is " + MAX_ELEMENTS);
+        }
+
+        return length;
+    }
 
     public DataStorageContext(DataInputStream in)
     {
