@@ -15,6 +15,8 @@ import java.nio.IntBuffer;
 
 public class Pixels
 {
+    public static final long MAX_CELLS = 1L << 28;
+
     private ByteBuffer buffer;
     public final int width;
     public final int height;
@@ -101,11 +103,18 @@ public class Pixels
 
     public static Pixels fromSize(int w, int h)
     {
-        ByteBuffer buffer = MemoryUtil.memAlloc(w * h * 4);
+        long cells = (long) w * (long) h;
+
+        if (w <= 0 || h <= 0 || cells > MAX_CELLS)
+        {
+            throw new IllegalArgumentException("Refusing a " + w + "x" + h + " buffer, the limit is " + MAX_CELLS + " pixels");
+        }
+
+        ByteBuffer buffer = MemoryUtil.memAlloc((int) (cells * 4));
 
         buffer.position(0);
 
-        for (int i = 0, c = w * h; i < c; i++)
+        for (int i = 0, c = (int) cells; i < c; i++)
         {
             buffer.put((byte) 0);
             buffer.put((byte) 0);

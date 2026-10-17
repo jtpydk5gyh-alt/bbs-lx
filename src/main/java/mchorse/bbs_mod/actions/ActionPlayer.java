@@ -305,10 +305,16 @@ public class ActionPlayer
         if (from != tick)
         {
             this.tick = from;
+            int to = Math.min(tick, this.duration);
 
-            while (this.tick != tick)
+            if (to < 0)
             {
-                this.tick += this.tick > tick ? -1 : 1;
+                to = 0;
+            }
+
+            while (this.tick != to)
+            {
+                this.tick += this.tick > to ? -1 : 1;
 
                 this.applyAction();
             }

@@ -16,6 +16,8 @@ import java.util.List;
  */
 public class WaveReader extends BinaryReader
 {
+    public static final int MAX_CHUNK = 1 << 27;
+
     public Wave read(InputStream stream) throws Exception
     {
         try
@@ -89,6 +91,12 @@ public class WaveReader extends BinaryReader
                             {
                                 String id = this.readFourString(bytes);
                                 int size = this.readInt(bytes);
+
+                                if (size < 0 || size > bytes.available())
+                                {
+                                    throw new EOFException("Refusing a LIST entry of " + size + " bytes");
+                                }
+
                                 byte[] stringData = new byte[size];
 
                                 bytes.read(stringData);
@@ -179,6 +187,11 @@ public class WaveReader extends BinaryReader
         int size = this.readInt(stream);
 
         this.log("- Read chunk size... " + size + " " + stream.available());
+
+        if (size < 0 || size > MAX_CHUNK)
+        {
+            throw new EOFException("Refusing a chunk of " + size + " bytes, the limit is " + MAX_CHUNK);
+        }
 
         return new BinaryChunk(id, size);
     }
