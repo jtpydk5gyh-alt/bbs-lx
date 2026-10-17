@@ -1,3 +1,8 @@
+# ---------------------------------------------------------------------------
+# Upstream (mchorse/bbs-mod) — bloque original, conservado tal cual.
+# No lo borres ni lo reordenes: son las reglas de este proyecto heredadas.
+# ---------------------------------------------------------------------------
+
 # gradle
 
 .gradle/
@@ -40,3 +45,69 @@ hs_err_*.log
 replay_*.log
 *.hprof
 *.jfr
+
+# ---------------------------------------------------------------------------
+# Added in this fork. Everything below the upstream block above.
+# ---------------------------------------------------------------------------
+
+# gradle — subdirectory builds and intermediate artefacts
+*/build/
+.gradle/caches/
+.kotlin/
+
+# maven — never published from this fork, and no credentials to do so
+.mvn/
+*.pom
+
+# ide — the ones the upstream block was missing
+.vs/
+*.code-workspace
+.history/
+.metals/
+.bloop/
+nbproject/
+*.swp
+*.swo
+*~
+
+# minecraft — test instances, including new ones
+runs/
+.fabric/
+.fabric-cache/
+crash-reports/
+
+# toolchains — there is no Java on this machine, so the obvious fix is a JDK
+# unpacked right here. A JDK is 300 MB: never in the repository.
+tools/
+jdk/
+gradle-portable/
+
+# Local working material. Never uploaded, by design.
+_local/
+.worktrees/
+
+# Credentials
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+local.properties
+credentials*
+*-key.json
+secrets.properties
+
+# Registros y volcados
+*.log
+*.dump
+*.dumpstream
+logs/
+nul
+
+# Sistema operativo
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+.AppleDouble
+.Spotlight-V100
+.Trashes/
