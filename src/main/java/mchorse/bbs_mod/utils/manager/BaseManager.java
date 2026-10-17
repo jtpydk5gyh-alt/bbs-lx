@@ -11,7 +11,10 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -63,6 +66,66 @@ public abstract class BaseManager <T extends ValueGroup> extends FolderManager<T
         }
 
         return null;
+    }
+
+    public List<File> getBackups(String id)
+    {
+        File file = this.getFile(id);
+
+        if (file == null)
+        {
+            return Collections.emptyList();
+        }
+
+        File folder = this.getBackupsFolder(id);
+        File[] files = folder.listFiles();
+
+        if (files == null)
+        {
+            return Collections.emptyList();
+        }
+
+        List<File> backups = new ArrayList<>();
+
+        for (File f : files)
+        {
+            if (f.isFile() && f.getName().endsWith(this.getExtension()))
+            {
+                backups.add(f);
+            }
+        }
+
+        backups.sort((a, b) -> b.getName().compareTo(a.getName()));
+
+        return backups;
+    }
+
+    public boolean restoreBackup(String id, File backup)
+    {
+        if (!this.getBackups(id).contains(backup))
+        {
+            return false;
+        }
+
+        try
+        {
+            MapType map = this.storage.load(backup);
+
+            return this.save(id, map);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    private File getBackupsFolder(String id)
+    {
+        File file = this.getFile(id);
+
+        return new File(file.getParentFile(), "_" + StringUtils.fileName(id));
     }
 
     @Override
