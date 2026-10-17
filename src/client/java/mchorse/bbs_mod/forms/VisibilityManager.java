@@ -6,6 +6,7 @@ import mchorse.bbs_mod.data.types.BaseType;
 import mchorse.bbs_mod.data.types.MapType;
 import mchorse.bbs_mod.settings.values.numeric.ValueBoolean;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +50,16 @@ public class VisibilityManager
 
     public void read()
     {
+        File file = BBSMod.getSettingsPath("categories.json");
+
+        if (!file.exists())
+        {
+            return;
+        }
+
         try
         {
-            BaseType data = DataToString.read(BBSMod.getSettingsPath("categories.json"));
+            BaseType data = DataToString.read(file);
 
             if (data instanceof MapType map)
             {
