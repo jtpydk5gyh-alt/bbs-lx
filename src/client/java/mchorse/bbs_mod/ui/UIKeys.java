@@ -612,6 +612,8 @@ public class UIKeys
     public static final IKey OVERLAYS_SOUNDS_FOLDER_MODE = L10n.lang("bbs.ui.overlays.sounds.folder_mode");
     public static final IKey OVERLAYS_SOUNDS_LIKE_MODE = L10n.lang("bbs.ui.overlays.sounds.like_mode");
     public static final IKey OVERLAYS_SOUNDS_MAIN = L10n.lang("bbs.ui.overlays.sounds.main");
+    public static final IKey PANELS_BACKUPS_RESTORE_ERROR = L10n.lang("bbs.ui.panels.backups.restore-error");
+    public static final IKey PANELS_BACKUPS_RESTORED_NOTIFICATION = L10n.lang("bbs.ui.panels.backups.restored-notification");
     public static final IKey PANELS_CONTEXT_BACKUPS = L10n.lang("bbs.ui.panels.context.backups");
     public static final IKey PANELS_CONTEXT_COPY = L10n.lang("bbs.ui.panels.context.copy");
     public static final IKey PANELS_CONTEXT_OPEN = L10n.lang("bbs.ui.panels.context.open");
