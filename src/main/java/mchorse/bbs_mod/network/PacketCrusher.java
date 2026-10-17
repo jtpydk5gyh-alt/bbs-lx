@@ -17,15 +17,18 @@ import java.util.function.Consumer;
 public abstract class PacketCrusher
 {
     public static final int BUFFER_SIZE = 30_000;
-    public static final int MAX_CHUNKS = 256;
+    public static final int MAX_CHUNKS = 1024;
     public static final int MAX_PENDING = 16;
+    public static final int MAX_PENDING_BYTES = 1 << 25;
 
     private Map<Integer, ByteArrayOutputStream> chunks = new HashMap<>();
+    private int pendingBytes;
     private int counter;
 
     public void reset()
     {
         this.chunks.clear();
+        this.pendingBytes = 0;
         this.counter = 0;
     }
 
@@ -51,6 +54,11 @@ public abstract class PacketCrusher
             return;
         }
 
+        if (this.pendingBytes + size > MAX_PENDING_BYTES)
+        {
+            return;
+        }
+
         byte[] bytes = new byte[size];
 
         buf.readBytes(bytes);
@@ -60,10 +68,12 @@ public abstract class PacketCrusher
         if (map.size() + size > total * BUFFER_SIZE)
         {
             this.chunks.remove(id);
+            this.pendingBytes -= map.size();
 
             return;
         }
 
+        this.pendingBytes += size;
         map.writeBytes(bytes);
 
         if (index == total - 1)
@@ -76,6 +86,7 @@ public abstract class PacketCrusher
             }
 
             this.chunks.remove(id);
+            this.pendingBytes -= finalBytes == null ? 1 : finalBytes.length;
 
             receiver.receiveBuffer(finalBytes, buf);
         }
@@ -105,6 +116,11 @@ public abstract class PacketCrusher
 
         int total = Math.max((int) Math.ceil(bytes.length / (float) BUFFER_SIZE), 1);
         int counter = this.counter;
+
+        if (total > MAX_CHUNKS)
+        {
+            throw new IllegalArgumentException("Payload of " + bytes.length + " bytes needs " + total + " chunks, the limit is " + MAX_CHUNKS);
+        }
 
         for (int index = 0; index < total; index++)
         {
