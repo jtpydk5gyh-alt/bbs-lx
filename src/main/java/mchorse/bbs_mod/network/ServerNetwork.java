@@ -42,6 +42,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -211,9 +212,21 @@ public class ServerNetwork
 
         crusher.receive(buf, (bytes, packetByteBuf) ->
         {
-            MapType data = (MapType) DataStorageUtils.readFromBytes(bytes);
+            if (!(DataStorageUtils.readFromBytes(bytes) instanceof MapType data))
+            {
+                return;
+            }
+
             int callbackId = packetByteBuf.readInt();
-            RepositoryOperation op = RepositoryOperation.values()[packetByteBuf.readInt()];
+            int operation = packetByteBuf.readInt();
+            RepositoryOperation[] operations = RepositoryOperation.values();
+
+            if (operation < 0 || operation >= operations.length)
+            {
+                return;
+            }
+
+            RepositoryOperation op = operations[operation];
             FilmManager films = BBSMod.getFilms();
 
             if (op == RepositoryOperation.LOAD)
@@ -221,7 +234,10 @@ public class ServerNetwork
                 String id = data.getString("id");
                 Film film = films.load(id);
 
-                sendManagerData(player, callbackId, op, film.toData());
+                if (film != null)
+                {
+                    sendManagerData(player, callbackId, op, film.toData());
+                }
             }
             else if (op == RepositoryOperation.SAVE)
             {
@@ -252,6 +268,36 @@ public class ServerNetwork
             else if (op == RepositoryOperation.DELETE_FOLDER)
             {
                 sendManagerData(player, callbackId, op, new ByteType(films.deleteFolder(data.getString("folder"))));
+            }
+            else if (op == RepositoryOperation.BACKUPS)
+            {
+                List<File> backups = films.getBackups(data.getString("id"));
+                List<String> names = new ArrayList<>();
+
+                for (File file : backups)
+                {
+                    names.add(file.getName());
+                }
+
+                sendManagerData(player, callbackId, op, DataStorageUtils.stringListToData(names));
+            }
+            else if (op == RepositoryOperation.RESTORE_BACKUP)
+            {
+                String id = data.getString("id");
+                String name = data.getString("backup");
+                File found = null;
+
+                for (File file : films.getBackups(id))
+                {
+                    if (file.getName().equals(name))
+                    {
+                        found = file;
+
+                        break;
+                    }
+                }
+
+                sendManagerData(player, callbackId, op, new ByteType(found != null && films.restoreBackup(id, found)));
             }
         });
     }
@@ -478,10 +524,19 @@ public class ServerNetwork
 
     private static void handleSharedFormPacket(MinecraftServer server, ServerPlayerEntity player, PacketByteBuf buf)
     {
+        if (!PermissionUtils.arePanelsAllowed(server, player))
+        {
+            return;
+        }
+
         crusher.receive(buf, (bytes, packetByteBuf) ->
         {
             UUID playerUuid = packetByteBuf.readUuid();
-            MapType data = (MapType) DataStorageUtils.readFromBytes(bytes);
+
+            if (!(DataStorageUtils.readFromBytes(bytes) instanceof MapType data))
+            {
+                return;
+            }
 
             server.execute(() ->
             {

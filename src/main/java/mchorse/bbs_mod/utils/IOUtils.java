@@ -16,6 +16,9 @@ import java.io.OutputStreamWriter;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -59,10 +62,36 @@ public class IOUtils
 
     public static void writeText(File file, String string) throws IOException
     {
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8));
+        File temp = new File(file.getAbsolutePath() + ".tmp");
 
-        writer.write(string);
-        writer.close();
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(temp), StandardCharsets.UTF_8)))
+        {
+            writer.write(string);
+        }
+
+        try
+        {
+            Files.move(temp.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        }
+        catch (AtomicMoveNotSupportedException e)
+        {
+            Files.move(temp.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    public static boolean inside(File root, File file)
+    {
+        try
+        {
+            String parent = root.getCanonicalPath();
+            String child = file.getCanonicalPath();
+
+            return child.equals(parent) || child.startsWith(parent + File.separator);
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
     /**

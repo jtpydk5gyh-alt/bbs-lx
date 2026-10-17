@@ -2,9 +2,11 @@ package mchorse.bbs_mod.utils.repos;
 
 import mchorse.bbs_mod.data.types.MapType;
 import mchorse.bbs_mod.settings.values.core.ValueGroup;
+import mchorse.bbs_mod.utils.manager.BaseManager;
 import mchorse.bbs_mod.utils.manager.FolderManager;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Consumer;
 
@@ -91,6 +93,44 @@ public class FolderManagerRepository <T extends ValueGroup> implements IReposito
         if (callback != null)
         {
             callback.accept(this.manager.deleteFolder(path));
+        }
+    }
+
+    @Override
+    public void requestBackups(String id, Consumer<Collection<String>> callback)
+    {
+        if (callback != null)
+        {
+            Collection<String> names = new ArrayList<>();
+
+            for (File file : this.manager.getBackups(id))
+            {
+                names.add(file.getName());
+            }
+
+            callback.accept(names);
+        }
+    }
+
+    @Override
+    public void restoreBackup(String id, String backup, Consumer<Boolean> callback)
+    {
+        boolean restored = false;
+
+        for (File file : this.manager.getBackups(id))
+        {
+            if (file.getName().equals(backup))
+            {
+                restored = this.manager instanceof BaseManager
+                    && ((BaseManager<T>) this.manager).restoreBackup(id, file);
+
+                break;
+            }
+        }
+
+        if (callback != null)
+        {
+            callback.accept(restored);
         }
     }
 }

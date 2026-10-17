@@ -9,6 +9,8 @@ import mchorse.bbs_mod.data.types.MapType;
 import mchorse.bbs_mod.settings.values.core.ValueGroup;
 import mchorse.bbs_mod.utils.MathUtils;
 import mchorse.bbs_mod.utils.factory.IFactory;
+import org.slf4j.Logger;
+import com.mojang.logging.LogUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +19,8 @@ import java.util.List;
 
 public class Clips extends ValueGroup
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     private List<Clip> clips = new ArrayList<>();
     private IFactory<Clip, ClipFactoryData> factory;
 
@@ -363,6 +367,10 @@ public class Clips extends ValueGroup
                     clip.distance.insert(0F, (double) map.getFloat("distance"));
 
                     this.clips.add(clip);
+                }
+                else
+                {
+                    LOGGER.error("Dropping a clip of type '{}' that could not be read. Save this film now if you still have the original, because the next save writes it without this clip.", map.getString("type"), e);
                 }
             }
         }

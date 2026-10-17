@@ -2,10 +2,12 @@ package mchorse.bbs_mod.resources.packs;
 
 import mchorse.bbs_mod.resources.ISourcePack;
 import mchorse.bbs_mod.resources.Link;
+import mchorse.bbs_mod.utils.IOUtils;
 import mchorse.bbs_mod.utils.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -68,13 +70,22 @@ public class ExternalAssetsSourcePack implements ISourcePack
     @Override
     public boolean hasAsset(Link link)
     {
-        return this.getFileInternal(link).exists();
+        File file = this.getFileInternal(link);
+
+        return file != null && file.exists();
     }
 
     @Override
     public InputStream getAsset(Link link) throws IOException
     {
-        return new FileInputStream(this.getFileInternal(link));
+        File file = this.getFileInternal(link);
+
+        if (file == null)
+        {
+            throw new FileNotFoundException(link.path);
+        }
+
+        return new FileInputStream(file);
     }
 
     @Override
@@ -106,7 +117,9 @@ public class ExternalAssetsSourcePack implements ISourcePack
 
     private File getFileInternal(Link link)
     {
-        return new File(this.folder, link.path);
+        File file = new File(this.folder, link.path);
+
+        return IOUtils.inside(this.folder, file) ? file : null;
     }
 
     @Override
@@ -114,7 +127,7 @@ public class ExternalAssetsSourcePack implements ISourcePack
     {
         File folder = this.getFileInternal(link);
 
-        if (folder.isDirectory())
+        if (folder != null && folder.isDirectory())
         {
             String path = link.path;
 

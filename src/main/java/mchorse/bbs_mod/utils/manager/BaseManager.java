@@ -11,7 +11,10 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -43,9 +46,16 @@ public abstract class BaseManager <T extends ValueGroup> extends FolderManager<T
     @Override
     public T load(String id)
     {
+        File file = this.getFile(id);
+
+        if (file == null)
+        {
+            return null;
+        }
+
         try
         {
-            MapType mapType = this.storage.load(this.getFile(id));
+            MapType mapType = this.storage.load(file);
             T data = this.create(id, mapType);
 
             return data;
@@ -58,10 +68,36 @@ public abstract class BaseManager <T extends ValueGroup> extends FolderManager<T
         return null;
     }
 
+    public boolean restoreBackup(String id, File backup)
+    {
+        if (!this.getBackups(id).contains(backup))
+        {
+            return false;
+        }
+
+        try
+        {
+            MapType map = this.storage.load(backup);
+
+            return this.save(id, map);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     @Override
     public boolean save(String id, MapType data)
     {
         File file = this.getFile(id);
+
+        if (file == null)
+        {
+            return false;
+        }
 
         try
         {

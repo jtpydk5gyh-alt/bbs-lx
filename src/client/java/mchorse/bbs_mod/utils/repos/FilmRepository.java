@@ -1,5 +1,6 @@
 package mchorse.bbs_mod.utils.repos;
 
+import mchorse.bbs_mod.data.DataStorageUtils;
 import mchorse.bbs_mod.data.types.BaseType;
 import mchorse.bbs_mod.data.types.MapType;
 import mchorse.bbs_mod.film.Film;
@@ -142,6 +143,39 @@ public class FilmRepository implements IRepository<Film>
         mapType.putString("folder", path);
 
         ClientNetwork.sendManagerData(RepositoryOperation.DELETE_FOLDER, mapType, (data) ->
+        {
+            if (data.isNumeric())
+            {
+                callback.accept(data.asNumeric().boolValue());
+            }
+        });
+    }
+
+    @Override
+    public void requestBackups(String id, Consumer<Collection<String>> callback)
+    {
+        MapType mapType = new MapType();
+
+        mapType.putString("id", id);
+
+        ClientNetwork.sendManagerData(RepositoryOperation.BACKUPS, mapType, (data) ->
+        {
+            if (data.isList())
+            {
+                callback.accept(DataStorageUtils.stringListFromData(data));
+            }
+        });
+    }
+
+    @Override
+    public void restoreBackup(String id, String backup, Consumer<Boolean> callback)
+    {
+        MapType mapType = new MapType();
+
+        mapType.putString("id", id);
+        mapType.putString("backup", backup);
+
+        ClientNetwork.sendManagerData(RepositoryOperation.RESTORE_BACKUP, mapType, (data) ->
         {
             if (data.isNumeric())
             {
