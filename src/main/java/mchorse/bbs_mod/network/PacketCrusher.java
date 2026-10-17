@@ -55,7 +55,14 @@ public abstract class PacketCrusher
 
         buf.readBytes(bytes);
 
-        ByteArrayOutputStream map = this.chunks.computeIfAbsent(id, (k) -> new ByteArrayOutputStream(total * BUFFER_SIZE));
+        ByteArrayOutputStream map = this.chunks.computeIfAbsent(id, (k) -> new ByteArrayOutputStream());
+
+        if (map.size() + size > total * BUFFER_SIZE)
+        {
+            this.chunks.remove(id);
+
+            return;
+        }
 
         map.writeBytes(bytes);
 
