@@ -68,38 +68,6 @@ public abstract class BaseManager <T extends ValueGroup> extends FolderManager<T
         return null;
     }
 
-    public List<File> getBackups(String id)
-    {
-        File file = this.getFile(id);
-
-        if (file == null)
-        {
-            return Collections.emptyList();
-        }
-
-        File folder = this.getBackupsFolder(id);
-        File[] files = folder.listFiles();
-
-        if (files == null)
-        {
-            return Collections.emptyList();
-        }
-
-        List<File> backups = new ArrayList<>();
-
-        for (File f : files)
-        {
-            if (f.isFile() && f.getName().endsWith(this.getExtension()))
-            {
-                backups.add(f);
-            }
-        }
-
-        backups.sort((a, b) -> b.getName().compareTo(a.getName()));
-
-        return backups;
-    }
-
     public boolean restoreBackup(String id, File backup)
     {
         if (!this.getBackups(id).contains(backup))
@@ -119,13 +87,6 @@ public abstract class BaseManager <T extends ValueGroup> extends FolderManager<T
         }
 
         return false;
-    }
-
-    private File getBackupsFolder(String id)
-    {
-        File file = this.getFile(id);
-
-        return new File(file.getParentFile(), "_" + StringUtils.fileName(id));
     }
 
     @Override

@@ -2,10 +2,14 @@ package mchorse.bbs_mod.utils.manager;
 
 import mchorse.bbs_mod.settings.values.core.ValueGroup;
 import mchorse.bbs_mod.utils.IOUtils;
+import mchorse.bbs_mod.utils.StringUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -170,6 +174,45 @@ public abstract class FolderManager <T extends ValueGroup> implements IManager<T
     protected boolean isData(File file)
     {
         return file.getName().endsWith(this.getExtension());
+    }
+
+    public List<File> getBackups(String id)
+    {
+        File file = this.getFile(id);
+
+        if (file == null)
+        {
+            return Collections.emptyList();
+        }
+
+        File folder = this.getBackupsFolder(id);
+        File[] files = folder.listFiles();
+
+        if (files == null)
+        {
+            return Collections.emptyList();
+        }
+
+        List<File> backups = new ArrayList<>();
+
+        for (File f : files)
+        {
+            if (f.isFile() && f.getName().endsWith(this.getExtension()))
+            {
+                backups.add(f);
+            }
+        }
+
+        backups.sort((a, b) -> b.getName().compareTo(a.getName()));
+
+        return backups;
+    }
+
+    protected File getBackupsFolder(String id)
+    {
+        File file = this.getFile(id);
+
+        return new File(file.getParentFile(), "_" + StringUtils.fileName(id));
     }
 
     public File getFile(String name)
