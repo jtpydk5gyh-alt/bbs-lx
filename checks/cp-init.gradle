@@ -3,7 +3,8 @@
    protected area and this file changes nothing about how the mod is built.
 
    Usage:  ./gradlew -I checks/cp-init.gradle printRuntimeCp
-   Result: build/cp.txt holds the classpath, one path per entry, separated by ; */
+   Result: build/cp.txt holds the classpath, separated by the path separator of
+           the platform running it. */
 
 allprojects
 {
@@ -16,10 +17,10 @@ allprojects
             files.addAll(project.sourceSets.main.runtimeClasspath.files)
             files.addAll(project.sourceSets.client.runtimeClasspath.files)
 
-            def all = files.collect { it.absolutePath }.unique().join(";")
+            def all = files.collect { it.absolutePath }.unique().join(File.pathSeparator)
 
             new File(project.rootDir, "build/cp.txt").text = all
-            println "CLASSPATH_WRITTEN:" + all.split(";").length + " entradas"
+            println "CLASSPATH_WRITTEN:" + all.split(java.util.regex.Pattern.quote(File.pathSeparator)).length + " entradas"
         }
     }
 }
