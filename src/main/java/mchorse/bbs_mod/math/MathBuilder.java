@@ -50,6 +50,8 @@ import java.util.Map;
  */
 public class MathBuilder
 {
+    public static final int MAX_LENGTH = 2048;
+    public static final int MAX_DEPTH = 64;
     /**
      * Named variables that can be used in math expression by this 
      * builder
@@ -158,6 +160,11 @@ public class MathBuilder
             return new Constant(0D);
         }
 
+        if (expression.length() > MAX_LENGTH)
+        {
+            throw new Exception("Given expression is " + expression.length() + " characters long, the limit is " + MAX_LENGTH);
+        }
+
         return this.parseSymbols(this.breakdownChars(this.breakdown(expression)));
     }
 
@@ -203,6 +210,16 @@ public class MathBuilder
      */
     public List<Object> breakdownChars(String[] chars)
     {
+        return this.breakdownChars(chars, 0);
+    }
+
+    private List<Object> breakdownChars(String[] chars, int depth)
+    {
+        if (depth > MAX_DEPTH)
+        {
+            throw new IllegalArgumentException("Expression is nested more than " + MAX_DEPTH + " levels deep");
+        }
+
         List<Object> symbols = new ArrayList<>();
         StringBuilder buffer = new StringBuilder();
         int len = chars.length;
@@ -285,7 +302,7 @@ public class MathBuilder
 
                     if (counter == 0)
                     {
-                        symbols.add(this.breakdownChars(buffer.toString().split("(?!^)")));
+                        symbols.add(this.breakdownChars(buffer.toString().split("(?!^)"), depth + 1));
 
                         i = j;
                         buffer = new StringBuilder();
@@ -318,6 +335,16 @@ public class MathBuilder
      */
     private List<Object> trimSymbols(List<Object> symbols)
     {
+        return this.trimSymbols(symbols, 0);
+    }
+
+    private List<Object> trimSymbols(List<Object> symbols, int depth)
+    {
+        if (depth > MAX_DEPTH)
+        {
+            throw new IllegalArgumentException("Expression is nested more than " + MAX_DEPTH + " levels deep");
+        }
+
         List<Object> newSymbols = new ArrayList<>();
 
         for (int i = 0; i < symbols.size(); i++)
@@ -335,7 +362,7 @@ public class MathBuilder
             }
             else
             {
-                newSymbols.add(this.trimSymbols((List) value));
+                newSymbols.add(this.trimSymbols((List) value, depth + 1));
             }
         }
 
@@ -356,7 +383,21 @@ public class MathBuilder
     @SuppressWarnings("unchecked")
     public IExpression parseSymbols(List<Object> symbols) throws Exception
     {
-        IExpression ternary = this.tryTernary(symbols);
+        return this.parseSymbols(symbols, 0);
+    }
+
+    private IExpression parseSymbols(List<Object> symbols, int depth) throws Exception
+    {
+        if (depth > MAX_DEPTH)
+        {
+            throw new IllegalArgumentException("Expression has more than " + MAX_DEPTH + " chained operators");
+        }
+
+        if (symbols.size() == 0)
+        {
+            throw new IllegalArgumentException("Expression is empty");
+        }
+        IExpression ternary = this.tryTernary(symbols, depth);
 
         if (ternary != null)
         {
@@ -379,7 +420,7 @@ public class MathBuilder
 
             if ((this.isVariable(first) || first.equals("-")) && second instanceof List)
             {
-                return this.createFunction((String) first, (List<Object>) second);
+                return this.createFunction((String) first, (List<Object>) second, depth + 1);
             }
         }
 
@@ -398,8 +439,8 @@ public class MathBuilder
 
                 if (right.value > left.value)
                 {
-                    IExpression leftValue = this.parseSymbols(symbols.subList(0, leftOp));
-                    IExpression rightValue = this.parseSymbols(symbols.subList(leftOp + 1, size));
+                    IExpression leftValue = this.parseSymbols(symbols.subList(0, leftOp), depth + 1);
+                    IExpression rightValue = this.parseSymbols(symbols.subList(leftOp + 1, size), depth + 1);
 
                     return new Operator(left, leftValue, rightValue);
                 }
@@ -409,14 +450,14 @@ public class MathBuilder
 
                     if (initial.value < left.value)
                     {
-                        IExpression leftValue = this.parseSymbols(symbols.subList(0, lastOp));
-                        IExpression rightValue = this.parseSymbols(symbols.subList(lastOp + 1, size));
+                        IExpression leftValue = this.parseSymbols(symbols.subList(0, lastOp), depth + 1);
+                        IExpression rightValue = this.parseSymbols(symbols.subList(lastOp + 1, size), depth + 1);
 
                         return new Operator(initial, leftValue, rightValue);
                     }
 
-                    IExpression leftValue = this.parseSymbols(symbols.subList(0, op));
-                    IExpression rightValue = this.parseSymbols(symbols.subList(op + 1, size));
+                    IExpression leftValue = this.parseSymbols(symbols.subList(0, op), depth + 1);
+                    IExpression rightValue = this.parseSymbols(symbols.subList(op + 1, size), depth + 1);
 
                     return new Operator(right, leftValue, rightValue);
                 }
@@ -427,7 +468,7 @@ public class MathBuilder
 
         Operation operation = this.operationForOperator((String) symbols.get(lastOp));
 
-        return new Operator(operation, this.parseSymbols(symbols.subList(0, lastOp)), this.parseSymbols(symbols.subList(lastOp + 1, size)));
+        return new Operator(operation, this.parseSymbols(symbols.subList(0, lastOp), depth + 1), this.parseSymbols(symbols.subList(lastOp + 1, size), depth + 1));
     }
 
     protected int seekLastOperator(List<Object> symbols)
@@ -472,7 +513,7 @@ public class MathBuilder
      * and some elements from beginning till ?, in between ? and :, and also some
      * remaining elements after :.
      */
-    protected IExpression tryTernary(List<Object> symbols) throws Exception
+    protected IExpression tryTernary(List<Object> symbols, int depth) throws Exception
     {
         int question = -1;
         int questions = 0;
@@ -510,9 +551,9 @@ public class MathBuilder
         if (questions == colons && question > 0 && question + 1 < colon && colon < size - 1)
         {
             return new Ternary(
-                this.parseSymbols(symbols.subList(0, question)),
-                this.parseSymbols(symbols.subList(question + 1, colon)),
-                this.parseSymbols(symbols.subList(colon + 1, size))
+                this.parseSymbols(symbols.subList(0, question), depth + 1),
+                this.parseSymbols(symbols.subList(question + 1, colon), depth + 1),
+                this.parseSymbols(symbols.subList(colon + 1, size), depth + 1)
             );
         }
 
@@ -530,28 +571,28 @@ public class MathBuilder
      * mixed with operators, groups, values and commas. And then plug it 
      * in to a class constructor with given name. 
      */
-    protected IExpression createFunction(String first, List<Object> args) throws Exception
+    protected IExpression createFunction(String first, List<Object> args, int depth) throws Exception
     {
         /* Handle special cases with negation */
         if (first.equals("!"))
         {
-            return new Negate(this.parseSymbols(args));
+            return new Negate(this.parseSymbols(args, depth + 1));
         }
 
         if (first.startsWith("!") && first.length() > 1)
         {
-            return new Negate(this.createFunction(first.substring(1), args));
+            return new Negate(this.createFunction(first.substring(1), args, depth + 1));
         }
 
         /* Handle inversion of the value */
         if (first.equals("-"))
         {
-            return new Negative(new Group(this.parseSymbols(args)));
+            return new Negative(new Group(this.parseSymbols(args, depth + 1)));
         }
 
         if (first.startsWith("-") && first.length() > 1)
         {
-            return new Negative(this.createFunction(first.substring(1), args));
+            return new Negative(this.createFunction(first.substring(1), args, depth + 1));
         }
 
         if (!this.functions.containsKey(first))
