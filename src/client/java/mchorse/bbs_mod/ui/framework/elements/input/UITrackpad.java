@@ -16,10 +16,12 @@ import mchorse.bbs_mod.ui.framework.elements.utils.FontRenderer;
 import mchorse.bbs_mod.ui.utils.Area;
 import mchorse.bbs_mod.ui.utils.icons.Icons;
 import mchorse.bbs_mod.utils.Factor;
+import com.mojang.logging.LogUtils;
 import mchorse.bbs_mod.utils.MathUtils;
 import mchorse.bbs_mod.utils.Timer;
 import mchorse.bbs_mod.utils.colors.Colors;
 import net.minecraft.client.MinecraftClient;
+import org.slf4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
 import java.math.RoundingMode;
@@ -32,6 +34,8 @@ import java.util.stream.Collectors;
 
 public class UITrackpad extends UIBaseTextbox
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     private static final Set<Character> allowedNumberCharacters = ".-+/*^%() ".chars()
         .mapToObj((o) -> (char) o)
         .collect(Collectors.toSet());
@@ -281,8 +285,13 @@ public class UITrackpad extends UIBaseTextbox
         }
     }
 
-    private void setValueInternal(double value)
+    private boolean setValueInternal(double value)
     {
+        if (!Double.isFinite(value))
+        {
+            return false;
+        }
+
         value = MathUtils.clamp(value, this.min, this.max);
 
         if (this.integer)
@@ -291,6 +300,8 @@ public class UITrackpad extends UIBaseTextbox
         }
 
         this.value = value;
+
+        return true;
     }
 
     /**
@@ -299,6 +310,11 @@ public class UITrackpad extends UIBaseTextbox
      */
     public void setValueAndNotify(double value)
     {
+        if (!Double.isFinite(value))
+        {
+            return;
+        }
+
         double oldValue = this.value;
 
         this.setValue(value);
@@ -564,7 +580,12 @@ public class UITrackpad extends UIBaseTextbox
             {
                 double oldValue = this.value;
 
-                this.setValueInternal(text.isEmpty() ? 0 : Double.parseDouble(text));
+                if (!this.setValueInternal(text.isEmpty() ? 0 : Double.parseDouble(text)))
+                {
+                    this.updateTextField();
+
+                    return result;
+                }
 
                 if (!this.delayedInput)
                 {
@@ -572,7 +593,9 @@ public class UITrackpad extends UIBaseTextbox
                 }
             }
             catch (Exception e)
-            {}
+            {
+                LOGGER.error("The value '" + text + "' was not read: " + e.getMessage());
+            }
         }
 
         return result;
@@ -584,7 +607,14 @@ public class UITrackpad extends UIBaseTextbox
 
         try
         {
-            Float.parseFloat(text);
+            float value = Float.parseFloat(text);
+
+            if (!Float.isFinite(value))
+            {
+                this.updateTextField();
+
+                return;
+            }
 
             return;
         }

@@ -2,6 +2,8 @@ package mchorse.bbs_mod.forms.forms;
 
 import mchorse.bbs_mod.BBSSettings;
 import mchorse.bbs_mod.cubic.animation.ActionsConfig;
+import mchorse.bbs_mod.data.types.BaseType;
+import mchorse.bbs_mod.data.types.MapType;
 import mchorse.bbs_mod.forms.values.ValueActionsConfig;
 import mchorse.bbs_mod.forms.values.ValueShapeKeys;
 import mchorse.bbs_mod.obj.shapes.ShapeKeys;
@@ -47,6 +49,25 @@ public class ModelForm extends Form
         this.add(this.actions);
         this.add(this.color);
         this.add(this.shapeKeys);
+    }
+
+    @Override
+    public void fromData(BaseType data)
+    {
+        if (data instanceof MapType map)
+        {
+            int count = this.countOverlays(map, "pose_overlay");
+
+            for (int i = this.additionalOverlays.size(); i < count; i++)
+            {
+                ValuePose valuePose = new ValuePose("pose_overlay" + i, new Pose());
+
+                this.additionalOverlays.add(valuePose);
+                this.add(valuePose);
+            }
+        }
+
+        super.fromData(data);
     }
 
     @Override

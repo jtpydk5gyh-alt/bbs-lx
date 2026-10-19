@@ -202,6 +202,17 @@ public class UIElement implements IUIElement, IUndoElement
         return this.children;
     }
 
+    /**
+     * The children of this element, as they are right now. A handler can add
+     * or remove children while it runs, so the list is copied before it is
+     * walked: otherwise a child can be visited twice, and walking the list
+     * while it changes throws.
+     */
+    private List<IUIElement> getChildrenSnapshot()
+    {
+        return new ArrayList<>(this.children);
+    }
+
     public <T> List<T> getChildren(Class<T> clazz)
     {
         return this.getChildren(clazz, new ArrayList<>());
@@ -369,7 +380,14 @@ public class UIElement implements IUIElement, IUndoElement
 
     public void remove(IUIElement element)
     {
-        this.children.remove(element);
+        if (element instanceof UIElement)
+        {
+            this.remove((UIElement) element);
+        }
+        else
+        {
+            this.children.remove(element);
+        }
     }
 
     public void remove(UIElement element)
@@ -1063,7 +1081,7 @@ public class UIElement implements IUIElement, IUndoElement
 
         this.afterResizeApplied();
 
-        for (IUIElement element : this.children)
+        for (IUIElement element : this.getChildrenSnapshot())
         {
             element.resize();
         }
@@ -1188,9 +1206,16 @@ public class UIElement implements IUIElement, IUndoElement
 
     protected IUIElement childrenMouseClicked(UIContext context)
     {
-        for (int i = this.children.size() - 1; i >= 0; i--)
+        List<IUIElement> children = this.getChildrenSnapshot();
+
+        for (int i = children.size() - 1; i >= 0; i--)
         {
-            IUIElement element = this.children.get(i);
+            IUIElement element = children.get(i);
+
+            if (element instanceof UIElement && ((UIElement) element).getParent() != this)
+            {
+                continue;
+            }
 
             if (element.isEnabled())
             {
@@ -1208,9 +1233,16 @@ public class UIElement implements IUIElement, IUndoElement
 
     protected IUIElement childrenMouseScrolled(UIContext context)
     {
-        for (int i = this.children.size() - 1; i >= 0; i--)
+        List<IUIElement> children = this.getChildrenSnapshot();
+
+        for (int i = children.size() - 1; i >= 0; i--)
         {
-            IUIElement element = this.children.get(i);
+            IUIElement element = children.get(i);
+
+            if (element instanceof UIElement && ((UIElement) element).getParent() != this)
+            {
+                continue;
+            }
 
             if (element.isEnabled())
             {
@@ -1228,9 +1260,16 @@ public class UIElement implements IUIElement, IUndoElement
 
     protected IUIElement childrenMouseReleased(UIContext context)
     {
-        for (int i = this.children.size() - 1; i >= 0; i--)
+        List<IUIElement> children = this.getChildrenSnapshot();
+
+        for (int i = children.size() - 1; i >= 0; i--)
         {
-            IUIElement element = this.children.get(i);
+            IUIElement element = children.get(i);
+
+            if (element instanceof UIElement && ((UIElement) element).getParent() != this)
+            {
+                continue;
+            }
 
             if (element.isEnabled())
             {
@@ -1248,9 +1287,16 @@ public class UIElement implements IUIElement, IUndoElement
 
     protected IUIElement childrenKeyPressed(UIContext context)
     {
-        for (int i = this.children.size() - 1; i >= 0; i--)
+        List<IUIElement> children = this.getChildrenSnapshot();
+
+        for (int i = children.size() - 1; i >= 0; i--)
         {
-            IUIElement element = this.children.get(i);
+            IUIElement element = children.get(i);
+
+            if (element instanceof UIElement && ((UIElement) element).getParent() != this)
+            {
+                continue;
+            }
 
             if (element.isEnabled())
             {
@@ -1268,9 +1314,16 @@ public class UIElement implements IUIElement, IUndoElement
 
     protected IUIElement childrenTextInput(UIContext context)
     {
-        for (int i = this.children.size() - 1; i >= 0; i--)
+        List<IUIElement> children = this.getChildrenSnapshot();
+
+        for (int i = children.size() - 1; i >= 0; i--)
         {
-            IUIElement element = this.children.get(i);
+            IUIElement element = children.get(i);
+
+            if (element instanceof UIElement && ((UIElement) element).getParent() != this)
+            {
+                continue;
+            }
 
             if (element.isEnabled())
             {
@@ -1390,7 +1443,7 @@ public class UIElement implements IUIElement, IUndoElement
             context.resetTooltip();
         }
 
-        for (IUIElement element : this.children)
+        for (IUIElement element : this.getChildrenSnapshot())
         {
             if (element.isVisible() && element.canBeRendered(context.getViewport()))
             {

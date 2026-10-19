@@ -9,7 +9,7 @@
     "block.bbs.chroma_black": "Chroma noire",
     "block.bbs.chroma_white": "Chroma blanche",
     "item.bbs.gun": "Pistolet BBS",
-    "itemGroup.bbs.main": "BBS mod",
+    "itemGroup.bbs.main": "BBS LX",
 
     "key.bbs.item_editor": "Éditeur item",
     "key.bbs.dashboard": "Menu",
@@ -22,7 +22,7 @@
     "key.bbs.record_video": "Record la vidéo",
     "key.bbs.teleport": "Se téléporter au replay actuel",
     "key.bbs.zoom": "Zoom (BBS gun)",
-    "category.bbs.main": "BBS mod",
+    "category.bbs.main": "BBS LX",
 
     "gamerule.bbsEditing": "Permission d'édition de BBS Mod"
 }

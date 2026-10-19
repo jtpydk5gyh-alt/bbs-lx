@@ -30,58 +30,85 @@ public class Pixels
     public static Pixels fromPNGStream(InputStream stream) throws IOException
     {
         ByteBuffer image = IOUtils.readByteBuffer(stream, 8 * 1024);
-        ByteBuffer pixels;
-        int w;
-        int h;
-        int bitsPerPixel;
+        ByteBuffer pixels = null;
 
-        try (MemoryStack stack = MemoryStack.stackPush())
+        try
         {
-            IntBuffer width = stack.mallocInt(1);
-            IntBuffer height = stack.mallocInt(1);
-            IntBuffer bits = stack.mallocInt(1);
+            int w;
+            int h;
+            int bitsPerPixel;
 
-            if (!STBImage.stbi_info_from_memory(image, width, height, bits))
+            try (MemoryStack stack = MemoryStack.stackPush())
             {
-                throw new RuntimeException("Failed to read image information: " + STBImage.stbi_failure_reason());
-            }
+                IntBuffer width = stack.mallocInt(1);
+                IntBuffer height = stack.mallocInt(1);
+                IntBuffer bits = stack.mallocInt(1);
 
-            w = width.get(0);
-            h = height.get(0);
-            bitsPerPixel = bits.get(0);
-
-            pixels = STBImage.stbi_load_from_memory(image, width, height, bits, 0);
-
-            /* Convert grayscale to RGBA */
-            if (bitsPerPixel <= 2)
-            {
-                ByteBuffer newBuffer = MemoryUtil.memAlloc(w * h * 4);
-
-                pixels.position(0);
-                pixels.limit(pixels.capacity());
-
-                for (int i = 0, c = pixels.limit() / bitsPerPixel; i < c; i++)
+                if (!STBImage.stbi_info_from_memory(image, width, height, bits))
                 {
-                    byte g = pixels.get();
-                    byte a = bitsPerPixel == 1 ? (byte) 255 : pixels.get();
-
-                    newBuffer.put(g);
-                    newBuffer.put(g);
-                    newBuffer.put(g);
-                    newBuffer.put(a);
+                    throw new IOException("Failed to read image information: " + STBImage.stbi_failure_reason());
                 }
 
-                newBuffer.flip();
-                MemoryUtil.memFree(pixels);
+                w = width.get(0);
+                h = height.get(0);
+                bitsPerPixel = bits.get(0);
 
-                pixels = newBuffer;
-                bitsPerPixel = 4;
+                long cells = (long) w * (long) h;
+
+                if (w <= 0 || h <= 0 || cells > MAX_CELLS)
+                {
+                    throw new IOException("Refusing a " + w + "x" + h + " image, the limit is " + MAX_CELLS + " pixels");
+                }
+
+                pixels = STBImage.stbi_load_from_memory(image, width, height, bits, 0);
+
+                if (pixels == null)
+                {
+                    throw new IOException("Failed to read the image: " + STBImage.stbi_failure_reason());
+                }
+
+                /* Convert grayscale to RGBA */
+                if (bitsPerPixel <= 2)
+                {
+                    ByteBuffer newBuffer = MemoryUtil.memAlloc((int) (cells * 4));
+
+                    pixels.position(0);
+                    pixels.limit(pixels.capacity());
+
+                    for (int i = 0, c = pixels.limit() / bitsPerPixel; i < c; i++)
+                    {
+                        byte g = pixels.get();
+                        byte a = bitsPerPixel == 1 ? (byte) 255 : pixels.get();
+
+                        newBuffer.put(g);
+                        newBuffer.put(g);
+                        newBuffer.put(g);
+                        newBuffer.put(a);
+                    }
+
+                    newBuffer.flip();
+                    MemoryUtil.memFree(pixels);
+
+                    pixels = newBuffer;
+                    bitsPerPixel = 4;
+                }
             }
+
+            MemoryUtil.memFree(image);
+
+            return new Pixels(pixels, w, h, bitsPerPixel);
         }
+        catch (Exception e)
+        {
+            if (pixels != null)
+            {
+                MemoryUtil.memFree(pixels);
+            }
 
-        MemoryUtil.memFree(image);
+            MemoryUtil.memFree(image);
 
-        return new Pixels(pixels, w, h, bitsPerPixel);
+            throw e;
+        }
     }
 
     public static Pixels fromIntArray(int width, int height, int[] data)

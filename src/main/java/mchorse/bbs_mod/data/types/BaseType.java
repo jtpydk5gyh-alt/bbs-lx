@@ -39,7 +39,16 @@ public abstract class BaseType
 
         if (output != null)
         {
-            output.read(context);
+            context.enter();
+
+            try
+            {
+                output.read(context);
+            }
+            finally
+            {
+                context.exit();
+            }
 
             return output;
         }
@@ -50,7 +59,17 @@ public abstract class BaseType
     public static void toData(DataStorageContext context, BaseType type) throws IOException
     {
         context.out.writeByte(type.getTypeId());
-        type.write(context);
+
+        context.enter();
+
+        try
+        {
+            type.write(context);
+        }
+        finally
+        {
+            context.exit();
+        }
     }
 
     public static boolean isMap(BaseType data)

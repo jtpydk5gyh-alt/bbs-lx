@@ -17,11 +17,27 @@ public abstract class BaseValueGroup extends BaseValue
 
     public BaseValue getRecursively(DataPath path)
     {
-        BaseValue value = this.get(path.size() <= 0 ? "" : path.strings.get(0));
+        if (path.size() <= 0)
+        {
+            throw new IllegalStateException("Property by path " + path + " can't be found!");
+        }
 
-        if (value == null && !path.strings.isEmpty())
+        BaseValue value = this.get(path.strings.get(0));
+
+        if (value == null)
         {
             value = this.searchRecursively(path);
+        }
+        else if (path.size() > 1)
+        {
+            if (value instanceof BaseValueGroup group)
+            {
+                value = group.getRecursively(new DataPath(path.strings.subList(1, path.size())));
+            }
+            else
+            {
+                value = null;
+            }
         }
 
         if (value == null)
@@ -37,22 +53,17 @@ public abstract class BaseValueGroup extends BaseValue
         int i = 0;
         BaseValue current = this;
 
-        while (current != null && i < splits.size() - 1)
+        while (current != null && i < splits.size())
         {
-            if (current instanceof BaseValueGroup)
+            if (current instanceof BaseValueGroup group)
             {
+                current = group.get(splits.strings.get(i));
                 i += 1;
-                current = ((BaseValueGroup) current).get(splits.strings.get(i));
             }
             else
             {
                 current = null;
             }
-        }
-
-        if (current == null)
-        {
-            return null;
         }
 
         return current;

@@ -9,7 +9,7 @@
     "block.bbs.chroma_black": "Чорний хрома-блок",
     "block.bbs.chroma_white": "Білий хрома-блок",
     "item.bbs.gun": "BBS рушниця",
-    "itemGroup.bbs.main": "BBS мод",
+    "itemGroup.bbs.main": "BBS LX",
 
     "key.bbs.item_editor": "Редактор предмету",
     "key.bbs.dashboard": "Бокова панель",
@@ -22,7 +22,7 @@
     "key.bbs.record_video": "Записати відео",
     "key.bbs.teleport": "Телепортувати до цього запису",
     "key.bbs.zoom": "Наближення (BBS рушниця)",
-    "category.bbs.main": "BBS мод",
+    "category.bbs.main": "BBS LX",
 
     "gamerule.bbsEditing": "Дозвіл на налаштування BBS моду"
 }

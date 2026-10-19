@@ -33,6 +33,11 @@ public class MathUtils
         return x < min ? min : (x > max ? max : x);
     }
 
+    public static double finite(double x, double fallback)
+    {
+        return Double.isFinite(x) ? x : fallback;
+    }
+
     public static long clamp(long x, long min, long max)
     {
         return x < min ? min : (x > max ? max : x);
