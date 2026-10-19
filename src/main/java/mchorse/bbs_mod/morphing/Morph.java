@@ -120,7 +120,7 @@ public class Morph
         {
             MapType map = (MapType) DataStorageUtils.fromNbt(compound.getCompound("Form"));
 
-            this.form = FormUtils.fromData(map);
+            this.setForm(FormUtils.fromData(map));
         }
     }
 }

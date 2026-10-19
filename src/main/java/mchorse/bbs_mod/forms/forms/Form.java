@@ -33,11 +33,11 @@ public abstract class Form extends ValueGroup
     public final ValueBoolean visible = new ValueBoolean("visible", true);
     public final ValueBoolean animatable = new ValueBoolean("animatable", true);
     public final ValueString trackName = new ValueString("track_name", "");
-    public final ValueFloat lighting = new ValueFloat("lighting", 1F);
+    public final ValueFloat lighting = new ValueFloat("lighting", 1F, 0F, 1F);
     public final ValueString name = new ValueString("name", "");
     public final ValueTransform transform = new ValueTransform("transform", new Transform());
     public final ValueTransform transformOverlay = new ValueTransform("transform_overlay", new Transform());
-    public final ValueFloat uiScale = new ValueFloat("uiScale", 1F);
+    public final ValueFloat uiScale = new ValueFloat("uiScale", 1F, 0.05F, 20F);
     public final ValueAnchor anchor = new ValueAnchor("anchor", new Anchor());
     public final ValueBoolean shaderShadow = new ValueBoolean("shaderShadow", true);
 
@@ -45,15 +45,15 @@ public abstract class Form extends ValueGroup
 
     /* Hitbox properties */
     public final ValueBoolean hitbox = new ValueBoolean("hitbox", false);
-    public final ValueFloat hitboxWidth = new ValueFloat("hitboxWidth", 0.5F);
-    public final ValueFloat hitboxHeight = new ValueFloat("hitboxHeight", 1.8F);
-    public final ValueFloat hitboxSneakMultiplier = new ValueFloat("hitboxSneakMultiplier", 0.9F);
-    public final ValueFloat hitboxEyeHeight = new ValueFloat("hitboxEyeHeight", 0.9F);
+    public final ValueFloat hitboxWidth = new ValueFloat("hitboxWidth", 0.5F, 0.01F, 16F);
+    public final ValueFloat hitboxHeight = new ValueFloat("hitboxHeight", 1.8F, 0.01F, 64F);
+    public final ValueFloat hitboxSneakMultiplier = new ValueFloat("hitboxSneakMultiplier", 0.9F, 0F, 10F);
+    public final ValueFloat hitboxEyeHeight = new ValueFloat("hitboxEyeHeight", 0.9F, 0F, 64F);
 
     /* Morphing properties */
-    public final ValueFloat hp = new ValueFloat("hp", 20F);
-    public final ValueFloat speed = new ValueFloat("movement_speed", 0.1F);
-    public final ValueFloat stepHeight = new ValueFloat("step_height", 0.5F);
+    public final ValueFloat hp = new ValueFloat("hp", 20F, 0F, 1024F);
+    public final ValueFloat speed = new ValueFloat("movement_speed", 0.1F, 0F, 10F);
+    public final ValueFloat stepHeight = new ValueFloat("step_height", 0.5F, 0F, 10F);
 
     public final ValueInt hotkey = new ValueInt("keybind", 0);
 
