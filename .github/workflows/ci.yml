@@ -64,7 +64,9 @@ jobs:
         run: ./gradlew -I checks/cp-init.gradle printRuntimeCp
 
       - name: Run the checks
-        run: java -cp "build/classes/java/main:build/classes/java/client:$(cat build/cp.txt)" checks/RunChecks.java
+        run: |
+          java -cp "build/classes/java/main:build/classes/java/client:$(cat build/cp.txt)" checks/RunChecks.java
+          java -cp "build/classes/java/main:build/classes/java/client:$(cat build/cp.txt)" checks/SegmentCheck.java
 
   public-surface:
     name: public surface
