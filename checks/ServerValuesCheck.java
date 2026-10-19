@@ -143,7 +143,7 @@ public class ServerValuesCheck
 
         ListType clips = new ListType();
 
-        for (int i = 0; i < 10000; i++)
+        for (int i = 0; i < Clips.MAX_CLIPS + 10; i++)
         {
             MapType clip = new MapType();
 

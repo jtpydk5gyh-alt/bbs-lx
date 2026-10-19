@@ -176,10 +176,46 @@ public class ActionManager
     {
         ActionRecorder remove = this.recorders.remove(entity);
 
+        if (remove == null)
+        {
+            return null;
+        }
+
         this.stop(remove.getFilm().getId());
         this.stopDamage(entity.getServerWorld());
 
         return remove;
+    }
+
+    /**
+     * The player is gone, so the recording and the films that were being
+     * played for them are not needed anymore. Without this the recorder of a
+     * player that disconnected was kept forever, and if the player left in the
+     * middle of a swing the server kept adding a clip on every tick.
+     */
+    public void removePlayer(ServerPlayerEntity player)
+    {
+        ActionRecorder recorder = this.recorders.remove(player);
+
+        if (recorder != null)
+        {
+            this.stop(recorder.getFilm().getId());
+            this.stopDamage(player.getServerWorld());
+        }
+
+        Iterator<ActionPlayer> it = this.players.iterator();
+
+        while (it.hasNext())
+        {
+            ActionPlayer actionPlayer = it.next();
+
+            if (actionPlayer.getServerPlayer() == player)
+            {
+                actionPlayer.stop();
+
+                it.remove();
+            }
+        }
     }
 
     /* Damage control */

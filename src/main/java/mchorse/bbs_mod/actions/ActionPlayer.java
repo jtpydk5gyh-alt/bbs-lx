@@ -157,6 +157,11 @@ public class ActionPlayer
         return this.world;
     }
 
+    public ServerPlayerEntity getServerPlayer()
+    {
+        return this.serverPlayer;
+    }
+
     private int getServerPlayerPermissionLevel()
     {
         if (this.serverPlayer == null)

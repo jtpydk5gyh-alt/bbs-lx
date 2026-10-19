@@ -81,6 +81,51 @@ public class FFMpegUtils
         return execute(BBSMod.getGameFolder(), "-version");
     }
 
+    /**
+     * Split a string of arguments the way a shell would, so that a path with
+     * spaces between quotes stays one argument. Splitting it by the spaces
+     * broke the export for everybody whose user name has a space in it.
+     */
+    public static List<String> splitArgs(String params)
+    {
+        List<String> args = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean quoted = false;
+        boolean started = false;
+
+        for (int i = 0; i < params.length(); i++)
+        {
+            char c = params.charAt(i);
+
+            if (c == '"')
+            {
+                quoted = !quoted;
+                started = true;
+            }
+            else if (c == ' ' && !quoted)
+            {
+                if (started)
+                {
+                    args.add(current.toString());
+                    current.setLength(0);
+                    started = false;
+                }
+            }
+            else
+            {
+                current.append(c);
+                started = true;
+            }
+        }
+
+        if (started)
+        {
+            args.add(current.toString());
+        }
+
+        return args;
+    }
+
     public static boolean execute(File folder, String... arguments)
     {
         List<String> args = new ArrayList<String>();

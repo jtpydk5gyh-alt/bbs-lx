@@ -124,6 +124,7 @@ regression slipped through before.
 | `LangCheck` | that the language files are valid JSON and have the same keys |
 | `TextLimitsCheck` | that a text file is not read whole into memory |
 | `UiListCheck` | that the children of an element are walked while they are a copy |
+| `ExportCheck` | that the arguments of the encoder keep the paths with spaces, and that the clips that do not fit are kept |
 
 ```bash
 ./gradlew build
