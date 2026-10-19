@@ -37,7 +37,7 @@ public class CubicModelAnimator
         }
 
         double start = segment.a.getValue().get();
-        double destination = segment.b.getValue().get();
+        double destination = segment.a == segment.b ? start : segment.b.getValue().get();
 
         if (segment.b.getInterpolation().getInterp() == Interpolations.BEZIER)
         {
@@ -51,8 +51,8 @@ public class CubicModelAnimator
             return Double.isFinite(result) ? result : defaultValue;
         }
 
-        double pre = segment.preA.getValue().get();
-        double post = segment.postB.getValue().get();
+        double pre = segment.preA == segment.a ? start : segment.preA.getValue().get();
+        double post = segment.postB == segment.b ? destination : segment.postB.getValue().get();
         double result = segment.b.getInterpolation().interpolate(IInterp.context.set(pre, start, destination, post, segment.x));
 
         return Double.isFinite(result) ? result : defaultValue;
