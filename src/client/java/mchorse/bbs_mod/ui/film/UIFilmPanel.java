@@ -998,6 +998,7 @@ public class UIFilmPanel extends UIDataDashboardPanel<Film> implements IFlightSu
                 if (!this.lastPosition.equals(current) && check)
                 {
                     this.cameraEditor.editClip(current);
+                    this.flightEditTime.mark();
                 }
             }
 

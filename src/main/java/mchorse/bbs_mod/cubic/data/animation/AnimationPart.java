@@ -62,7 +62,12 @@ public class AnimationPart implements IMapSerializable
 
     private void parseAnimationVector(KeyframeChannel<MolangExpression> x, KeyframeChannel<MolangExpression> y, KeyframeChannel<MolangExpression> z, BaseType data, MolangExpression defaultValue)
     {
-        ListType values = (ListType) data;
+        if (!BaseType.isList(data))
+        {
+            return;
+        }
+
+        ListType values = data.asList();
 
         if (values.size() >= 5)
         {
