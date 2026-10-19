@@ -1408,21 +1408,17 @@ public class UIClips extends UIElement
 
         while (this.collisionExists(others, data, dx, dy))
         {
-            boolean moved = false;
-
             if (dir % 2 == 0 && dx != 0)
             {
                 dx -= Integer.signum(dx);
-                moved = true;
             }
 
             if (dir % 2 == 1 && dy != 0)
             {
                 dy -= Integer.signum(dy);
-                moved = true;
             }
 
-            if (!moved)
+            if (dx == 0 && dy == 0)
             {
                 break;
             }
