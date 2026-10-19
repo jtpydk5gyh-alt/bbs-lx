@@ -95,6 +95,26 @@ Here we have:
 * Self-explanatory comments must be avoided.
 * JavaDocs comments must be present only above the method or class definition, but prior to any **annotations**!
 
+## Checks
+
+`checks/RunChecks.java` holds the checks that protect the fixes in this fork: the
+atomic film save, path containment, the limits read from a stream, the factory
+error messages, the backup list and restore, the chunker's limits, and the type
+guards on the load path.
+
+They run against the **real compiled classes**, not against a copy of the rules
+they test, because a check that reimplements the rule cannot fail when the rule
+breaks. That is exactly how a regression slipped through before.
+
+```bash
+./gradlew build
+./gradlew -I checks/cp-init.gradle printRuntimeCp
+java -cp "build/classes/java/main:build/classes/java/client:$(cat build/cp.txt)" checks/RunChecks.java
+```
+
+The CI runs them on every pull request, next to the build. They need a JDK, not
+the game.
+
 ## Pull requests
 
 `main` is protected: nothing reaches it except through a pull request, not even a maintainer.
