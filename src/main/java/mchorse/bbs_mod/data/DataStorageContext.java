@@ -9,6 +9,7 @@ import java.util.Map;
 public class DataStorageContext
 {
     public static final int MAX_ELEMENTS = 1 << 24;
+    public static final int MAX_DEPTH = 64;
 
     public final DataInputStream in;
     public final DataOutputStream out;
@@ -17,6 +18,7 @@ public class DataStorageContext
     private Map<Integer, String> intMap;
     private int index;
     private KeyType type = KeyType.BYTE;
+    private int depth;
 
     public static int readLength(DataInputStream in) throws IOException
     {
@@ -82,6 +84,21 @@ public class DataStorageContext
     public String readKey() throws IOException
     {
         return this.getKey(this.type.read(this.in));
+    }
+
+    public void enter() throws IOException
+    {
+        this.depth += 1;
+
+        if (this.depth > MAX_DEPTH)
+        {
+            throw new IOException("Refusing to read data nested more than " + MAX_DEPTH + " levels deep");
+        }
+    }
+
+    public void exit()
+    {
+        this.depth -= 1;
     }
 
     public void write() throws IOException

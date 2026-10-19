@@ -95,6 +95,41 @@ Here we have:
 * Self-explanatory comments must be avoided.
 * JavaDocs comments must be present only above the method or class definition, but prior to any **annotations**!
 
+## Checks
+
+The `checks/` folder holds the checks that protect the fixes in this fork. Each
+file checks one thing, and each one runs against the **real compiled
+classes**, not against a copy of the rules it tests, because a check that
+reimplements the rule cannot fail when the rule breaks. That is exactly how a
+regression slipped through before.
+
+| Check | What it protects |
+| --- | --- |
+| `RunChecks` | the atomic film save, path containment, the limits read from a stream, the factory error messages, the backup list and restore, the type guards on the load path |
+| `SegmentCheck` | the neighbours of a keyframe segment, including two keyframes in the same tick |
+| `ParserLimitCheck` | the limits of the expression parser |
+| `FiniteCheck` | that a value that is not a number does not reach a bone or the camera |
+| `EvalCountCheck` | that a keyframe is evaluated once per interpolation, and the handles it hands over |
+| `MolangCheck` | the Molang parser: its limits and a variable of a single letter |
+| `AnimationRoundTripCheck` | that the animation of a model survives a save and a load |
+| `DataDepthCheck` | the limits of the data format |
+| `ExpressionKeepCheck` | that an expression the parser refuses is not erased |
+| `CrusherCheck` | the chunker, from end to end |
+| `AssetsCheck` | the readers of the sounds, the voxel models and the images |
+| `ServerValuesCheck` | the values of a film and the limits of the lists |
+
+```bash
+./gradlew build
+./gradlew -I checks/cp-init.gradle printRuntimeCp
+for check in checks/*Check.java; do
+  java -cp "build/classes/java/main:build/classes/java/client:$(cat build/cp.txt)" "$check"
+done
+```
+
+The CI runs all of them on every pull request, next to the build. They need a
+JDK, not the game. The files that end in `Bench.java` are benchmarks: they
+print numbers and assert nothing, so they are not part of the build.
+
 ## Pull requests
 
 `main` is protected: nothing reaches it except through a pull request, not even a maintainer.
@@ -105,7 +140,7 @@ Every pull request has to explain three things, and the CI enforces the rest:
 2. **The change.** What you did, and what you deliberately did not do.
 3. **The verification.** The exact commands you ran and what they printed.
 
-Before it can be merged, `build`, `public surface` and `gradle config untouched` all have to be green.
+Before it can be merged, `build`, `checks`, `public surface` and `gradle config untouched` all have to be green.
 
 **Say what you could not check.** This mod touches rendering, keyboard, mixins and networking, and a green build only proves the Java parses. If you did not open Minecraft and see it work, write that it was not checked and say what would be needed. A pull request that claims "works" without that evidence gets rejected, because the claim is indistinguishable from a guess.
 
