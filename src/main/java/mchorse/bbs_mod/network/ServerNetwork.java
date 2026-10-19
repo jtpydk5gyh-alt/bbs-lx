@@ -343,6 +343,12 @@ public class ServerNetwork
             else
             {
                 ActionRecorder recorder = BBSMod.getActions().stopRecording(player);
+
+                if (recorder == null)
+                {
+                    return;
+                }
+
                 Clips clips = recorder.composeClips();
 
                 /* Send recorded clips to the client */

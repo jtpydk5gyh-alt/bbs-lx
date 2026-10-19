@@ -19,9 +19,12 @@ import java.util.List;
 
 public class Clips extends ValueGroup
 {
+    public static final int MAX_CLIPS = 16384;
+
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private List<Clip> clips = new ArrayList<>();
+    private List<BaseType> extraClips = new ArrayList<>();
     private IFactory<Clip, ClipFactoryData> factory;
 
     public Clips(String id, IFactory<Clip, ClipFactoryData> factory)
@@ -321,6 +324,11 @@ public class Clips extends ValueGroup
             list.add(this.factory.toData(clip));
         }
 
+        for (BaseType extra : this.extraClips)
+        {
+            list.add(extra);
+        }
+
         return list;
     }
 
@@ -328,9 +336,31 @@ public class Clips extends ValueGroup
     public void fromData(BaseType base)
     {
         this.clips.clear();
+        this.extraClips.clear();
+
+        if (!BaseType.isList(base))
+        {
+            LOGGER.error("The camera of this film is not a list of clips, so it was not read. Save this film now if you still have the original, because the next save writes it without these clips.");
+
+            this.sync();
+
+            return;
+        }
 
         for (BaseType type : base.asList())
         {
+            if (this.clips.size() >= MAX_CLIPS)
+            {
+                if (this.extraClips.isEmpty())
+                {
+                    LOGGER.error("This group of clips has more than " + MAX_CLIPS + " clips and the rest were not read. They are kept as they are, so the next save writes them back.");
+                }
+
+                this.extraClips.add(type);
+
+                continue;
+            }
+
             if (!type.isMap())
             {
                 continue;

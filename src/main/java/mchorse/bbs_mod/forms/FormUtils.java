@@ -1,5 +1,6 @@
 package mchorse.bbs_mod.forms;
 
+import com.mojang.logging.LogUtils;
 import mchorse.bbs_mod.BBSMod;
 import mchorse.bbs_mod.data.types.BaseType;
 import mchorse.bbs_mod.data.types.ListType;
@@ -12,6 +13,7 @@ import mchorse.bbs_mod.settings.values.base.BaseValueBasic;
 import mchorse.bbs_mod.utils.CollectionUtils;
 import mchorse.bbs_mod.utils.StringUtils;
 import mchorse.bbs_mod.utils.keyframes.KeyframeChannel;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +23,8 @@ import java.util.List;
 public class FormUtils
 {
     public static final String PATH_SEPARATOR = "/";
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final List<String> path = new ArrayList<>();
 
@@ -41,7 +45,9 @@ public class FormUtils
             return data == null ? null : BBSMod.getForms().fromData(data);
         }
         catch (Exception e)
-        {}
+        {
+            LOGGER.error("A form could not be read: " + e.getMessage());
+        }
 
         return null;
     }
@@ -250,26 +256,28 @@ public class FormUtils
 
             if (property == null)
             {
+                int index;
+
                 try
                 {
-                    int index = Integer.parseInt(segment);
-
-                    if (CollectionUtils.inRange(form.parts.getAll(), index))
-                    {
-                        form = form.parts.getAllTyped().get(index).getForm();
-
-                        if (form == null)
-                        {
-                            return null;
-                        }
-                    }
-                    else
-                    {
-                        return null;
-                    }
+                    index = Integer.parseInt(segment);
                 }
-                catch (Exception e)
-                {}
+                catch (NumberFormatException e)
+                {
+                    return null;
+                }
+
+                if (!CollectionUtils.inRange(form.parts.getAll(), index))
+                {
+                    return null;
+                }
+
+                form = form.parts.getAllTyped().get(index).getForm();
+
+                if (form == null)
+                {
+                    return null;
+                }
             }
             else
             {

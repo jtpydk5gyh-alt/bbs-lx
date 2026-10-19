@@ -9,7 +9,7 @@
     "block.bbs.chroma_black": "کالا کرومہ",
     "block.bbs.chroma_white": "سفید کرومہ",
     "item.bbs.gun": "BBS بندوق",
-    "itemGroup.bbs.main": "BBS ماڈ",
+    "itemGroup.bbs.main": "BBS LX",
 
     "key.bbs.item_editor": "آئٹم ایڈیٹر",
     "key.bbs.dashboard": "ڈیش بورڈ",
@@ -22,7 +22,7 @@
     "key.bbs.record_video": "ویڈیو ریکارڈ کریں",
     "key.bbs.teleport": "موجودہ ری پلے پر ٹیلی پورٹ کریں",
     "key.bbs.zoom": "زوم کریں (BBS بندوق)",
-    "category.bbs.main": "BBS ماڈ",
+    "category.bbs.main": "BBS LX",
 
     "gamerule.bbsEditing": "BBS ماڈ کی ایڈیٹنگ کی اجازت"
 }

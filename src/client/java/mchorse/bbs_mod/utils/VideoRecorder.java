@@ -4,8 +4,10 @@ import mchorse.bbs_mod.BBSMod;
 import mchorse.bbs_mod.BBSSettings;
 import mchorse.bbs_mod.client.BBSRendering;
 import mchorse.bbs_mod.ui.utils.UIUtils;
+import com.mojang.logging.LogUtils;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryUtil;
+import org.slf4j.Logger;
 import sun.misc.Unsafe;
 
 import java.io.File;
@@ -25,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 
 public class VideoRecorder
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     private Process process;
     private WritableByteChannel channel;
     private boolean recording;
@@ -114,7 +118,7 @@ public class VideoRecorder
             String encoder = FFMpegUtils.getFFMPEG();
 
             args.add(encoder);
-            args.addAll(Arrays.asList(params.split(" ")));
+            args.addAll(FFMpegUtils.splitArgs(params));
 
             System.out.println("Recording video with following arguments: " + args);
 
@@ -228,7 +232,22 @@ public class VideoRecorder
         {
             if (this.process != null)
             {
-                this.process.waitFor(1, TimeUnit.MINUTES);
+                boolean finished = this.process.waitFor(1, TimeUnit.MINUTES);
+
+                if (!finished)
+                {
+                    LOGGER.error("The encoder did not finish in a minute, so it was stopped. The video is probably incomplete.");
+                }
+                else
+                {
+                    int code = this.process.exitValue();
+
+                    if (code != 0)
+                    {
+                        LOGGER.error("The encoder finished with the code " + code + ", so the video was not written. Its log is next to the video.");
+                    }
+                }
+
                 this.process.destroy();
             }
 

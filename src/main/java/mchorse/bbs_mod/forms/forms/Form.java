@@ -33,11 +33,11 @@ public abstract class Form extends ValueGroup
     public final ValueBoolean visible = new ValueBoolean("visible", true);
     public final ValueBoolean animatable = new ValueBoolean("animatable", true);
     public final ValueString trackName = new ValueString("track_name", "");
-    public final ValueFloat lighting = new ValueFloat("lighting", 1F);
+    public final ValueFloat lighting = new ValueFloat("lighting", 1F, 0F, 1F);
     public final ValueString name = new ValueString("name", "");
     public final ValueTransform transform = new ValueTransform("transform", new Transform());
     public final ValueTransform transformOverlay = new ValueTransform("transform_overlay", new Transform());
-    public final ValueFloat uiScale = new ValueFloat("uiScale", 1F);
+    public final ValueFloat uiScale = new ValueFloat("uiScale", 1F, 0.05F, 20F);
     public final ValueAnchor anchor = new ValueAnchor("anchor", new Anchor());
     public final ValueBoolean shaderShadow = new ValueBoolean("shaderShadow", true);
 
@@ -45,15 +45,15 @@ public abstract class Form extends ValueGroup
 
     /* Hitbox properties */
     public final ValueBoolean hitbox = new ValueBoolean("hitbox", false);
-    public final ValueFloat hitboxWidth = new ValueFloat("hitboxWidth", 0.5F);
-    public final ValueFloat hitboxHeight = new ValueFloat("hitboxHeight", 1.8F);
-    public final ValueFloat hitboxSneakMultiplier = new ValueFloat("hitboxSneakMultiplier", 0.9F);
-    public final ValueFloat hitboxEyeHeight = new ValueFloat("hitboxEyeHeight", 0.9F);
+    public final ValueFloat hitboxWidth = new ValueFloat("hitboxWidth", 0.5F, 0.01F, 16F);
+    public final ValueFloat hitboxHeight = new ValueFloat("hitboxHeight", 1.8F, 0.01F, 64F);
+    public final ValueFloat hitboxSneakMultiplier = new ValueFloat("hitboxSneakMultiplier", 0.9F, 0F, 10F);
+    public final ValueFloat hitboxEyeHeight = new ValueFloat("hitboxEyeHeight", 0.9F, 0F, 64F);
 
     /* Morphing properties */
-    public final ValueFloat hp = new ValueFloat("hp", 20F);
-    public final ValueFloat speed = new ValueFloat("movement_speed", 0.1F);
-    public final ValueFloat stepHeight = new ValueFloat("step_height", 0.5F);
+    public final ValueFloat hp = new ValueFloat("hp", 20F, 0F, 1024F);
+    public final ValueFloat speed = new ValueFloat("movement_speed", 0.1F, 0F, 10F);
+    public final ValueFloat stepHeight = new ValueFloat("step_height", 0.5F, 0F, 10F);
 
     public final ValueInt hotkey = new ValueInt("keybind", 0);
 
@@ -131,6 +131,22 @@ public abstract class Form extends ValueGroup
     public void setRenderer(Object renderer)
     {
         this.renderer = renderer;
+    }
+
+    /**
+     * How many overlays of the given name the data has. They are numbered
+     * from zero and without holes.
+     */
+    protected int countOverlays(MapType map, String prefix)
+    {
+        int count = 0;
+
+        while (map.has(prefix + count))
+        {
+            count += 1;
+        }
+
+        return count;
     }
 
     public Form getParentForm()
@@ -339,12 +355,25 @@ public abstract class Form extends ValueGroup
     {
         if (data instanceof MapType map)
         {
+            /* The overlays that were recorded are kept, even when the setting
+               says there are less of them now, because the next save writes
+               the form without the ones that are missing. */
+            int count = this.countOverlays(map, "transform_overlay");
+
+            for (int i = this.additionalTransforms.size(); i < count; i++)
+            {
+                ValueTransform valueTransform = new ValueTransform("transform_overlay" + i, new Transform());
+
+                this.additionalTransforms.add(valueTransform);
+                this.add(valueTransform);
+            }
+
             /* Compatibility with older forms */
-            if (map.has("bodyParts"))
+            if (map.has("bodyParts") && !map.has("parts"))
             {
                 MapType bodyParts = map.getMap("bodyParts");
 
-                if (bodyParts.has("parts"))
+                if (bodyParts.has("parts") && bodyParts.get("parts").isList())
                 {
                     map.remove("bodyParts");
                     map.put("parts", bodyParts.getList("parts"));
