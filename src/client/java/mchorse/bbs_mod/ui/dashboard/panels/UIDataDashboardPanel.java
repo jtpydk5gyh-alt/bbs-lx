@@ -212,7 +212,7 @@ public abstract class UIDataDashboardPanel <T extends ValueGroup> extends UICRUD
 
         if (seconds > 0)
         {
-            if (this.savingTimer.check() && this.canSave(context))
+            if (this.unsaved && this.savingTimer.check() && this.canSave(context))
             {
                 this.savingTimer.mark(seconds * 1000L);
 
