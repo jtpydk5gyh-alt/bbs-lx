@@ -61,6 +61,7 @@ public class UIClips extends UIElement
 
     private static final int MARGIN = 10;
     private static final int LAYER_HEIGHT = 20;
+    public static final int MAX_LAYERS = 512;
 
     private static final Area CLIP_AREA = new Area();
 
@@ -907,6 +908,11 @@ public class UIClips extends UIElement
         for (Clip clip : this.clips.get())
         {
             this.layers = Math.max(this.layers, clip.layer.get() + 1);
+        }
+
+        if (this.layers > MAX_LAYERS)
+        {
+            this.layers = MAX_LAYERS;
         }
     }
 
