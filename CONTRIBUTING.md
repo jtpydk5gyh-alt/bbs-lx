@@ -117,6 +117,13 @@ regression slipped through before.
 | `CrusherCheck` | the chunker, from end to end |
 | `AssetsCheck` | the readers of the sounds, the voxel models and the images |
 | `ServerValuesCheck` | the values of a film and the limits of the lists |
+| `PathCheck` | that a path of a value is walked to the end, and not only its first segment |
+| `FormDataCheck` | that a form with a value of the wrong type is not emptied |
+| `FormLimitsCheck` | that the numbers of a form are bounded |
+| `FormOverlayCheck` | that the overlays that were recorded are not thrown away |
+| `LangCheck` | that the language files are valid JSON and have the same keys |
+| `TextLimitsCheck` | that a text file is not read whole into memory |
+| `UiListCheck` | that the children of an element are walked while they are a copy |
 
 ```bash
 ./gradlew build
