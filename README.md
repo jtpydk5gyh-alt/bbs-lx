@@ -49,3 +49,16 @@ Because this mod renders, handles input and patches Minecraft internals with mix
 * Everyone listed in the `authors` and `contributors` blocks of `fabric.mod.json`, and the translators whose work ships in the assets.
 
 The attribution in `fabric.mod.json` — the authors, the contributors and the contact — is left exactly as upstream wrote it. Only the name and the description are this fork's.
+
+## Third-party licenses
+
+The jar carries only this mod's own code and its own assets, under the MIT license above. The libraries it needs are separate and carry their own licenses:
+
+| | License |
+| --- | --- |
+| Fabric Loader, Fabric API | Apache-2.0 |
+| Sodium | LGPL-3.0 |
+| Iris, Distant Horizons | LGPL-3.0 |
+| Indium | Apache-2.0 |
+
+Iris, Distant Horizons and Indium are optional and are only compiled against.
