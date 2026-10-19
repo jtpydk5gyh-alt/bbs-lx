@@ -26,6 +26,8 @@ public class SuperFakePlayer extends ServerPlayerEntity
     private static final GameProfile PROFILE = new GameProfile(UUID.fromString("12345678-9ABC-DEF1-2345-6789ABCDEF69"), "[BBS Player]");
     private static final Map<SuperFakePlayer.FakePlayerKey, SuperFakePlayer> FAKE_PLAYER_MAP = new MapMaker().weakValues().makeMap();
 
+    private int permissionLevel = 0;
+
     public static SuperFakePlayer get(ServerWorld world)
     {
         Objects.requireNonNull(world, "World may not be null.");
@@ -40,10 +42,15 @@ public class SuperFakePlayer extends ServerPlayerEntity
         this.networkHandler = new SuperFakePlayerNetworkHandler(this);
     }
 
+    public void setPermissionLevel(int permissionLevel)
+    {
+        this.permissionLevel = permissionLevel;
+    }
+
     @Override
     protected int getPermissionLevel()
     {
-        return 2;
+        return this.permissionLevel;
     }
 
     @Override

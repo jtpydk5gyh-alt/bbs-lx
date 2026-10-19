@@ -28,6 +28,8 @@ import java.util.Map;
 
 public class ActionPlayer
 {
+    public static final int MAX_DURATION = 20 * 60 * 60;
+
     public Film film;
     public int tick;
     public boolean playing = true;
@@ -62,7 +64,7 @@ public class ActionPlayer
         this.type = type;
 
         this.serverPlayer = serverPlayer;
-        this.duration = film.camera.calculateDuration();
+        this.duration = Math.min(film.camera.calculateDuration(), MAX_DURATION);
 
         this.updateReplayEntities();
 
@@ -149,6 +151,16 @@ public class ActionPlayer
     public ServerWorld getWorld()
     {
         return this.world;
+    }
+
+    private int getServerPlayerPermissionLevel()
+    {
+        if (this.serverPlayer == null)
+        {
+            return 0;
+        }
+
+        return this.serverPlayer.getServer().getPermissionLevel(this.serverPlayer.getGameProfile());
     }
 
     public void apply(LivingEntity actor, Replay replay, float tick, boolean ticking)
@@ -249,6 +261,8 @@ public class ActionPlayer
     {
         SuperFakePlayer fakePlayer = SuperFakePlayer.get(this.world);
         List<Replay> list = this.film.replays.getList();
+
+        fakePlayer.setPermissionLevel(this.getServerPlayerPermissionLevel());
 
         for (int i = 0; i < list.size(); i++)
         {
