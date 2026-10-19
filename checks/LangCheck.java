@@ -50,6 +50,11 @@ public class LangCheck
     {
         File folder = new File(args.length > 0 ? args[0] : "src/main/resources/assets/bbs/lang");
 
+        if (!folder.isDirectory())
+        {
+            folder = new File("build/resources/main/assets/bbs/lang");
+        }
+
         System.out.println("== los ficheros de idioma son JSON valido ==");
 
         File[] files = folder.listFiles((dir, name) -> name.endsWith(".json"));
