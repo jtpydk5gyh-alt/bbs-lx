@@ -16,6 +16,8 @@ public class ValueExpression extends BaseValue
     public MathBuilder builder;
     public boolean lastError;
 
+    private String text = "";
+
     public ValueExpression(String id, MathBuilder builder)
     {
         super(id);
@@ -47,6 +49,8 @@ public class ValueExpression extends BaseValue
 
     private void setExpressionPrivate(String string)
     {
+        this.text = string;
+
         try
         {
             if (string.isEmpty())
@@ -64,6 +68,8 @@ public class ValueExpression extends BaseValue
         {
             this.expression = null;
             this.lastError = true;
+
+            LOGGER.error("The expression was not read, so it was kept as text: " + e.getMessage());
         }
     }
 
@@ -89,6 +95,11 @@ public class ValueExpression extends BaseValue
     @Override
     public String toString()
     {
-        return this.expression == null ? "" : this.expression.toString();
+        if (this.expression != null)
+        {
+            return this.expression.toString();
+        }
+
+        return this.text == null ? "" : this.text;
     }
 }

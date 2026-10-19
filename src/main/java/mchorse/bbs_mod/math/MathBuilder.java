@@ -51,7 +51,7 @@ import java.util.Map;
 public class MathBuilder
 {
     public static final int MAX_LENGTH = 2048;
-    public static final int MAX_DEPTH = 64;
+    public static final int MAX_DEPTH = 256;
     /**
      * Named variables that can be used in math expression by this 
      * builder
