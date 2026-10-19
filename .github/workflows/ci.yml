@@ -42,6 +42,32 @@ jobs:
           path: build/libs/*.jar
           if-no-files-found: error
 
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: temurin
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build
+        run: ./gradlew build --stacktrace
+
+      # The checks run against the real compiled classes, not against a copy of
+      # the rules they test, so a change that breaks them fails the build.
+      - name: Resolve the runtime classpath
+        run: ./gradlew -I checks/cp-init.gradle printRuntimeCp
+
+      - name: Run the checks
+        run: |
+          java -cp "build/classes/java/main:build/classes/java/client:$(cat build/cp.txt)" checks/RunChecks.java
+          java -cp "build/classes/java/main:build/classes/java/client:$(cat build/cp.txt)" checks/SegmentCheck.java
+
   public-surface:
     name: public surface
     runs-on: ubuntu-latest

@@ -251,6 +251,10 @@ public class UITextureEditor extends UIPixelsEditor
             this.fillPixels(Texture.pixelsFromTexture(t));
             this.setDirty(false);
         }
+        else
+        {
+            this.fillPixels(null);
+        }
     }
 
     @Override
