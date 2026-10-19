@@ -6,6 +6,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector2d;
 import org.joml.Vector3f;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +21,8 @@ import java.util.Map;
  */
 public class BOBJLoader
 {
+    public static final int MAX_FACES = 1 << 22;
+
     public static void merge(BOBJData to, BOBJData from)
     {
         int vertSize = to.vertices.size();
@@ -115,6 +118,11 @@ public class BOBJLoader
             else if (first.equals("f"))
             {
                 /* Collect faces */
+                if (mesh.faces.size() >= MAX_FACES)
+                {
+                    throw new IOException("This mesh has more than " + MAX_FACES + " faces.");
+                }
+
                 mesh.faces.add(new Face(tokens[1], tokens[2], tokens[3]));
             }
             else if (first.equals("arm_name"))
