@@ -4,11 +4,15 @@ import mchorse.bbs_mod.data.types.BaseType;
 import mchorse.bbs_mod.data.types.MapType;
 import mchorse.bbs_mod.resources.Link;
 import mchorse.bbs_mod.utils.colors.Colors;
+import org.slf4j.Logger;
+import com.mojang.logging.LogUtils;
 
 import java.util.Objects;
 
 public class FilteredLink implements IWritableLink
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     public Link path;
 
     public boolean autoSize = true;
@@ -27,18 +31,18 @@ public class FilteredLink implements IWritableLink
 
     public static FilteredLink from(BaseType data)
     {
-        try
+        if (!BaseType.isString(data) && !BaseType.isMap(data))
         {
-            FilteredLink location = new FilteredLink();
+            LOGGER.error("Dropping a link that is neither a path nor a set of filters");
 
-            location.fromData(data);
-
-            return location;
+            return null;
         }
-        catch (Exception e)
-        {}
 
-        return null;
+        FilteredLink location = new FilteredLink();
+
+        location.fromData(data);
+
+        return location;
     }
 
     public FilteredLink()
@@ -158,7 +162,12 @@ public class FilteredLink implements IWritableLink
             return;
         }
 
-        MapType map = (MapType) data;
+        if (!BaseType.isMap(data))
+        {
+            return;
+        }
+
+        MapType map = data.asMap();
 
         this.path = LinkUtils.create(map.getString("path"));
 

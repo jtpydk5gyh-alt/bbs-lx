@@ -99,7 +99,8 @@ Here we have:
 
 `checks/RunChecks.java` holds the checks that protect the fixes in this fork: the
 atomic film save, path containment, the limits read from a stream, the factory
-error messages, the backup list and restore, and the chunker's limits.
+error messages, the backup list and restore, the chunker's limits, and the type
+guards on the load path.
 
 They run against the **real compiled classes**, not against a copy of the rules
 they test, because a check that reimplements the rule cannot fail when the rule

@@ -1,11 +1,22 @@
+import mchorse.bbs_mod.camera.values.ValueExpression;
+import mchorse.bbs_mod.cubic.data.animation.AnimationPart;
+import mchorse.bbs_mod.data.DataStorageUtils;
 import mchorse.bbs_mod.data.storage.DataFileStorage;
 import mchorse.bbs_mod.data.types.BaseType;
+import mchorse.bbs_mod.data.types.IntType;
+import mchorse.bbs_mod.data.types.ListType;
 import mchorse.bbs_mod.data.types.MapType;
 import mchorse.bbs_mod.data.types.StringType;
+import mchorse.bbs_mod.math.MathBuilder;
 import mchorse.bbs_mod.network.PacketCrusher;
 import mchorse.bbs_mod.utils.IOUtils;
+import mchorse.bbs_mod.utils.clips.Clips;
+import mchorse.bbs_mod.utils.keyframes.KeyframeChannel;
+import mchorse.bbs_mod.utils.keyframes.factories.KeyframeFactories;
 import mchorse.bbs_mod.utils.manager.BaseManager;
 import mchorse.bbs_mod.utils.manager.storage.CompressedDataStorage;
+import mchorse.bbs_mod.utils.resources.FilteredLink;
+import mchorse.bbs_mod.utils.resources.MultiLink;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +66,7 @@ public class RunChecks
         factoryReportsTheTruth();
         backupsAreListableAndRestorable();
         crusherAgreesWithItself();
+        malformedDataDoesNotBreakTheLoad();
 
         System.out.println();
         System.out.println(failed == 0
@@ -371,5 +383,101 @@ public class RunChecks
         map.put("marca", new StringType(value));
 
         return map;
+    }
+
+    /* --- 7. data of the wrong type is rejected instead of crashing the load --- */
+
+    static void malformedDataDoesNotBreakTheLoad() throws Exception
+    {
+        section("los datos malformados no rompen la carga");
+
+        Clips clips = new Clips("camera", null);
+
+        check("una camara que no es una lista no rompe la carga", doesNotThrow(() -> clips.fromData(new IntType(5))));
+        check("una camara ausente (null) no rompe la carga", doesNotThrow(() -> clips.fromData(null)));
+        check("la camara malformada deja la pelicula sin clips", clips.get().isEmpty());
+
+        ValueExpression expression = new ValueExpression("expression", new MathBuilder());
+
+        check("una expresion que no es texto no rompe la carga", doesNotThrow(() -> expression.fromData(new IntType(5))));
+        check("la expresion malformada se queda vacia", expression.get() == null);
+
+        expression.fromData(new StringType("1 + 2"));
+
+        check("una expresion de texto sigue funcionando", expression.get() != null);
+
+        ListType keyframes = new ListType();
+        MapType keyframe = new MapType();
+
+        keyframe.putDouble("tick", 0D);
+        keyframe.putDouble("value", 1D);
+        keyframes.add(keyframe);
+
+        MapType unknownType = new MapType();
+
+        unknownType.putString("type", "tipo-inventado");
+        unknownType.put("keyframes", keyframes);
+
+        KeyframeChannel<Double> channel = new KeyframeChannel<>("channel", KeyframeFactories.DOUBLE);
+
+        check("un tipo de keyframe desconocido no rompe la carga", doesNotThrow(() -> channel.fromData(unknownType)));
+        check("un tipo desconocido deja la fabrica intacta", channel.getFactory() != null);
+        check("un tipo desconocido no deja keyframes a medias", channel.getList().isEmpty());
+
+        KeyframeChannel<Double> orphan = new KeyframeChannel<>("x", null);
+
+        check("un canal sin fabrica (propiedad de un replay) no rompe la carga", doesNotThrow(() -> orphan.fromData(unknownType)));
+
+        MapType knownType = new MapType();
+
+        knownType.putString("type", "double");
+        knownType.put("keyframes", keyframes);
+
+        KeyframeChannel<Double> known = new KeyframeChannel<>("channel", KeyframeFactories.DOUBLE);
+
+        known.fromData(knownType);
+
+        check("un tipo conocido sigue leyendo los keyframes", known.getList().size() == 1);
+        check("el keyframe leido conserva su valor", known.getList().get(0).getValue() == 1D);
+
+        check("un enlace que no es texto ni mapa se rechaza", FilteredLink.from(new IntType(5)) == null);
+        check("un enlace de texto sigue funcionando", FilteredLink.from(new StringType("mi-modelo")) != null);
+        check("una multi lista que no es lista se rechaza", MultiLink.from(new IntType(5)) == null);
+
+        ListType mixed = new ListType();
+
+        mixed.add(new StringType("mi-modelo"));
+        mixed.add(new IntType(5));
+
+        MultiLink multi = MultiLink.from(mixed);
+
+        check("un elemento malo de una multi lista se salta", multi != null && multi.children.size() == 1);
+        check("una multi lista llamada con otra cosa no rompe la carga", doesNotThrow(() -> new MultiLink().fromData(new IntType(5))));
+
+        MapType animation = new MapType();
+        ListType translate = new ListType();
+
+        translate.add(new IntType(5));
+        animation.put("translate", translate);
+
+        check("un keyframe de animacion que no es una lista no rompe la carga", doesNotThrow(() -> new AnimationPart(null).fromData(animation)));
+
+        check("un payload ausente se lee como null", DataStorageUtils.readFromBytes(null) == null);
+    }
+
+    static boolean doesNotThrow(Runnable runnable)
+    {
+        try
+        {
+            runnable.run();
+
+            return true;
+        }
+        catch (Throwable t)
+        {
+            System.out.println("       (" + t.getClass().getSimpleName() + ": " + t.getMessage() + ")");
+
+            return false;
+        }
     }
 }
