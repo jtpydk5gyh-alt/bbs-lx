@@ -329,6 +329,15 @@ public class Clips extends ValueGroup
     {
         this.clips.clear();
 
+        if (!BaseType.isList(base))
+        {
+            LOGGER.error("The camera of this film is not a list of clips, so it was not read. Save this film now if you still have the original, because the next save writes it without these clips.");
+
+            this.sync();
+
+            return;
+        }
+
         for (BaseType type : base.asList())
         {
             if (!type.isMap())

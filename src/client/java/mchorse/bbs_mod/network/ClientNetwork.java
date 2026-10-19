@@ -37,6 +37,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import org.slf4j.Logger;
+import com.mojang.logging.LogUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +47,8 @@ import java.util.function.Consumer;
 
 public class ClientNetwork
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     private static int ids = 0;
     private static Map<Integer, Consumer<BaseType>> callbacks = new HashMap<>();
     private static ClientPacketCrusher crusher = new ClientPacketCrusher();
@@ -143,10 +147,18 @@ public class ClientNetwork
         {
             String filmId = packetByteBuf.readString();
             boolean withCamera = packetByteBuf.readBoolean();
+
+            if (!(DataStorageUtils.readFromBytes(bytes) instanceof MapType data))
+            {
+                LOGGER.error("The server sent a film that could not be read, so it was not played");
+
+                return;
+            }
+
             Film film = new Film();
 
             film.setId(filmId);
-            film.fromData(DataStorageUtils.readFromBytes(bytes));
+            film.fromData(data);
 
             client.execute(() -> Films.playFilm(film, withCamera));
         });
@@ -166,6 +178,13 @@ public class ClientNetwork
             }
 
             BaseType data = DataStorageUtils.readFromBytes(bytes);
+
+            if (data == null)
+            {
+                LOGGER.error("The server sent data that could not be read, so it was ignored");
+
+                return;
+            }
 
             client.execute(() ->
             {

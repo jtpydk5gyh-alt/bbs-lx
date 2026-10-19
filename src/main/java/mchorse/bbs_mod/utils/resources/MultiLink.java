@@ -30,16 +30,9 @@ public class MultiLink extends Link implements IWritableLink
 
         MultiLink multi = new MultiLink();
 
-        try
-        {
-            multi.fromData(data);
+        multi.fromData(data);
 
-            return multi;
-        }
-        catch (Exception e)
-        {}
-
-        return null;
+        return multi;
     }
 
     public MultiLink(String resourceName)
@@ -109,7 +102,12 @@ public class MultiLink extends Link implements IWritableLink
     @Override
     public void fromData(BaseType element)
     {
-        ListType array = (ListType) element;
+        if (!BaseType.isList(element))
+        {
+            return;
+        }
+
+        ListType array = element.asList();
 
         for (int i = 0; i < array.size(); i++)
         {
