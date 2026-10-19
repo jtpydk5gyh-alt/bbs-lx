@@ -340,11 +340,11 @@ public abstract class Form extends ValueGroup
         if (data instanceof MapType map)
         {
             /* Compatibility with older forms */
-            if (map.has("bodyParts"))
+            if (map.has("bodyParts") && !map.has("parts"))
             {
                 MapType bodyParts = map.getMap("bodyParts");
 
-                if (bodyParts.has("parts"))
+                if (bodyParts.has("parts") && bodyParts.get("parts").isList())
                 {
                     map.remove("bodyParts");
                     map.put("parts", bodyParts.getList("parts"));
