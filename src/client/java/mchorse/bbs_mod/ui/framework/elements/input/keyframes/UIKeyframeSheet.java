@@ -9,7 +9,9 @@ import mchorse.bbs_mod.utils.keyframes.Keyframe;
 import mchorse.bbs_mod.utils.keyframes.KeyframeChannel;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UIKeyframeSheet
 {
@@ -63,10 +65,21 @@ public class UIKeyframeSheet
         this.selection.clear();
 
         List keyframes = this.channel.getKeyframes();
+        Map<Keyframe, Integer> indices = new IdentityHashMap<>();
+
+        for (int i = 0; i < keyframes.size(); i++)
+        {
+            indices.put((Keyframe) keyframes.get(i), i);
+        }
 
         for (Keyframe keyframe : selected)
         {
-            this.selection.add(keyframes.indexOf(keyframe));
+            Integer index = indices.get(keyframe);
+
+            if (index != null)
+            {
+                this.selection.add(index);
+            }
         }
 
         return lastSelection;

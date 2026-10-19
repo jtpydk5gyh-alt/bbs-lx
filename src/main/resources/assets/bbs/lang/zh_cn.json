@@ -9,7 +9,7 @@
     "block.bbs.chroma_black": "黑色色度方块",
     "block.bbs.chroma_white": "白色色度方块",
     "item.bbs.gun": "BBS 枪",
-    "itemGroup.bbs.main": "BBS mod",
+    "itemGroup.bbs.main": "BBS LX",
 
     "key.bbs.item_editor": "物品编辑器",
     "key.bbs.dashboard": "仪表盘",
@@ -22,7 +22,7 @@
     "key.bbs.record_video": "录制视频",
     "key.bbs.teleport": "传送至当前回放",
     "key.bbs.zoom": "瞄准 (BBS 枪)",
-    "category.bbs.main": "BBS mod",
+    "category.bbs.main": "BBS LX",
 
     "gamerule.bbsEditing": "BBS mod 的编辑权限"
 }
