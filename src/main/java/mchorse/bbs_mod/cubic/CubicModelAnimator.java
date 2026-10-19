@@ -41,18 +41,21 @@ public class CubicModelAnimator
 
         if (segment.b.getInterpolation().getInterp() == Interpolations.BEZIER)
         {
-            return BezierUtils.get(start, destination,
+            double result = BezierUtils.get(start, destination,
                 segment.a.getTick(), segment.b.getTick(),
                 segment.a.rx, segment.a.ry,
                 segment.b.lx, segment.b.ly,
                 segment.x
             );
+
+            return Double.isFinite(result) ? result : defaultValue;
         }
 
         double pre = segment.preA.getValue().get();
         double post = segment.postB.getValue().get();
+        double result = segment.b.getInterpolation().interpolate(IInterp.context.set(pre, start, destination, post, segment.x));
 
-        return segment.b.getInterpolation().interpolate(IInterp.context.set(pre, start, destination, post, segment.x));
+        return Double.isFinite(result) ? result : defaultValue;
     }
 
     public static void animate(Model model, Animation animation, float frame, float blend, boolean skipInitial)
