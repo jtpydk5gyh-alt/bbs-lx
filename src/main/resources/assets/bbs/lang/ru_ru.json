@@ -9,7 +9,7 @@
     "block.bbs.chroma_black": "Чёрный хрома",
     "block.bbs.chroma_white": "Белый хрома",
     "item.bbs.gun": "ББС ружьё",
-    "itemGroup.bbs.main": "ББС мод",
+    "itemGroup.bbs.main": "BBS LX",
 
     "key.bbs.item_editor": "Редактор предметов",
     "key.bbs.dashboard": "Главная панель",
@@ -22,7 +22,7 @@
     "key.bbs.record_video": "Записать видео",
     "key.bbs.teleport": "Телепортироваться к тек. записи",
     "key.bbs.zoom": "Прицелиться (ББС ружьё)",
-    "category.bbs.main": "ББС мод",
+    "category.bbs.main": "BBS LX",
 
     "gamerule.bbsEditing": "Привелегии редактирование ББС мода"
 }

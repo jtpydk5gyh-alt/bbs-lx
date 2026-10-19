@@ -14,6 +14,7 @@ import mchorse.bbs_mod.utils.pose.Transform;
 public class BodyPart extends ValueGroup
 {
     private Form form;
+    private BaseType rawForm;
 
     public final ValueTransform transform = new ValueTransform("transform", new Transform());
     public final ValueString bone = new ValueString("bone", "");
@@ -97,7 +98,24 @@ public class BodyPart extends ValueGroup
             MapType map = data.asMap();
             Form form = map.has("form") ? FormUtils.fromData(map.getMap("form")) : null;
 
+            /* The form of a part that could not be read is kept as it is, so
+               the next save does not write an empty part over it. */
+            this.rawForm = form == null && map.has("form") ? map.get("form") : null;
+
             this.setInternalForm(form);
         }
+    }
+
+    @Override
+    public BaseType toData()
+    {
+        BaseType data = super.toData();
+
+        if (this.form == null && this.rawForm != null && data instanceof MapType map)
+        {
+            map.put("form", this.rawForm);
+        }
+
+        return data;
     }
 }

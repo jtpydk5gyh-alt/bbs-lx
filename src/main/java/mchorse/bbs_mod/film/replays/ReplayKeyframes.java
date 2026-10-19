@@ -3,6 +3,7 @@ package mchorse.bbs_mod.film.replays;
 import mchorse.bbs_mod.forms.entities.IEntity;
 import mchorse.bbs_mod.settings.values.base.BaseValue;
 import mchorse.bbs_mod.settings.values.core.ValueGroup;
+import mchorse.bbs_mod.utils.MathUtils;
 import mchorse.bbs_mod.utils.interps.IInterp;
 import mchorse.bbs_mod.utils.interps.Interpolations;
 import mchorse.bbs_mod.utils.keyframes.Keyframe;
@@ -250,8 +251,11 @@ public class ReplayKeyframes extends ValueGroup
 
         if (position)
         {
-            entity.setVelocity(this.vX.interpolate(tick).floatValue(), this.vY.interpolate(tick).floatValue(), this.vZ.interpolate(tick).floatValue());
-            entity.setFallDistance(this.fall.interpolate(tick).floatValue());
+            entity.setVelocity(
+                (float) MathUtils.finite(this.vX.interpolate(tick), 0D),
+                (float) MathUtils.finite(this.vY.interpolate(tick), 0D),
+                (float) MathUtils.finite(this.vZ.interpolate(tick), 0D));
+            entity.setFallDistance((float) MathUtils.finite(this.fall.interpolate(tick), 0D));
 
             KeyframeSegment<Double> x = this.x.findSegment(tick);
             Vector2d xx = this.getPrev(x, this.x.interpolate(tick - 1), tick);
@@ -260,10 +264,13 @@ public class ReplayKeyframes extends ValueGroup
             KeyframeSegment<Double> z = this.z.findSegment(tick);
             Vector2d zz = this.getPrev(z, this.z.interpolate(tick - 1), tick);
 
-            entity.setPosition(xx.x, yy.x, zz.x);
-            entity.setPrevX(xx.y);
-            entity.setPrevY(yy.y);
-            entity.setPrevZ(zz.y);
+            entity.setPosition(
+                MathUtils.finite(xx.x, entity.getX()),
+                MathUtils.finite(yy.x, entity.getY()),
+                MathUtils.finite(zz.x, entity.getZ()));
+            entity.setPrevX(MathUtils.finite(xx.y, entity.getX()));
+            entity.setPrevY(MathUtils.finite(yy.y, entity.getY()));
+            entity.setPrevZ(MathUtils.finite(zz.y, entity.getZ()));
         }
 
         if (rotation)
@@ -277,53 +284,53 @@ public class ReplayKeyframes extends ValueGroup
             KeyframeSegment<Double> bodyYaw = this.bodyYaw.findSegment(tick);
             Vector2d bbodyYaw = this.getPrev(bodyYaw, this.bodyYaw.interpolate(tick - 1), tick);
 
-            entity.setYaw((float) yyaw.x);
-            entity.setPitch((float) ppitch.x);
-            entity.setHeadYaw((float) hheadYaw.x);
-            entity.setBodyYaw((float) bbodyYaw.x);
+            entity.setYaw((float) MathUtils.finite(yyaw.x, entity.getYaw()));
+            entity.setPitch((float) MathUtils.finite(ppitch.x, entity.getPitch()));
+            entity.setHeadYaw((float) MathUtils.finite(hheadYaw.x, entity.getHeadYaw()));
+            entity.setBodyYaw((float) MathUtils.finite(bbodyYaw.x, entity.getBodyYaw()));
 
-            entity.setPrevYaw((float) yyaw.y);
-            entity.setPrevPitch((float) ppitch.y);
-            entity.setPrevHeadYaw((float) hheadYaw.y);
-            entity.setPrevBodyYaw((float) bbodyYaw.y);
+            entity.setPrevYaw((float) MathUtils.finite(yyaw.y, entity.getPrevYaw()));
+            entity.setPrevPitch((float) MathUtils.finite(ppitch.y, entity.getPrevPitch()));
+            entity.setPrevHeadYaw((float) MathUtils.finite(hheadYaw.y, entity.getPrevHeadYaw()));
+            entity.setPrevBodyYaw((float) MathUtils.finite(bbodyYaw.y, entity.getPrevBodyYaw()));
         }
 
         /* Motion and fall distance */
         entity.setSneaking(this.sneaking.interpolate(tick) != 0D);
         entity.setSprinting(this.sprinting.interpolate(tick) != 0D);
         entity.setOnGround(this.grounded.interpolate(tick) != 0D);
-        entity.setHurtTimer(this.damage.interpolate(tick).intValue());
+        entity.setHurtTimer((int) MathUtils.finite(this.damage.interpolate(tick), 0D));
 
         float[] sticks = entity.getExtraVariables();
 
         if (leftStick)
         {
-            sticks[0] = this.stickLeftX.interpolate(tick).floatValue();
-            sticks[1] = this.stickLeftY.interpolate(tick).floatValue();
+            sticks[0] = (float) MathUtils.finite(this.stickLeftX.interpolate(tick), 0D);
+            sticks[1] = (float) MathUtils.finite(this.stickLeftY.interpolate(tick), 0D);
         }
 
         if (rightStick)
         {
-            sticks[2] = this.stickRightX.interpolate(tick).floatValue();
-            sticks[3] = this.stickRightY.interpolate(tick).floatValue();
+            sticks[2] = (float) MathUtils.finite(this.stickRightX.interpolate(tick), 0D);
+            sticks[3] = (float) MathUtils.finite(this.stickRightY.interpolate(tick), 0D);
         }
 
         if (triggers)
         {
-            sticks[4] = this.triggerLeft.interpolate(tick).floatValue();
-            sticks[5] = this.triggerRight.interpolate(tick).floatValue();
+            sticks[4] = (float) MathUtils.finite(this.triggerLeft.interpolate(tick), 0D);
+            sticks[5] = (float) MathUtils.finite(this.triggerRight.interpolate(tick), 0D);
         }
 
         if (extra1)
         {
-            sticks[6] = this.extra1X.interpolate(tick).floatValue();
-            sticks[7] = this.extra1Y.interpolate(tick).floatValue();
+            sticks[6] = (float) MathUtils.finite(this.extra1X.interpolate(tick), 0D);
+            sticks[7] = (float) MathUtils.finite(this.extra1Y.interpolate(tick), 0D);
         }
 
         if (extra2)
         {
-            sticks[8] = this.extra2X.interpolate(tick).floatValue();
-            sticks[9] = this.extra2Y.interpolate(tick).floatValue();
+            sticks[8] = (float) MathUtils.finite(this.extra2X.interpolate(tick), 0D);
+            sticks[9] = (float) MathUtils.finite(this.extra2Y.interpolate(tick), 0D);
         }
 
         entity.setEquipmentStack(EquipmentSlot.MAINHAND, this.mainHand.interpolate(tick));

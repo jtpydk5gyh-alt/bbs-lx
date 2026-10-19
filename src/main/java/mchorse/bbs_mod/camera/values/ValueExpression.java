@@ -5,12 +5,18 @@ import mchorse.bbs_mod.data.types.StringType;
 import mchorse.bbs_mod.math.IExpression;
 import mchorse.bbs_mod.math.MathBuilder;
 import mchorse.bbs_mod.settings.values.base.BaseValue;
+import org.slf4j.Logger;
+import com.mojang.logging.LogUtils;
 
 public class ValueExpression extends BaseValue
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     public IExpression expression;
     public MathBuilder builder;
     public boolean lastError;
+
+    private String text = "";
 
     public ValueExpression(String id, MathBuilder builder)
     {
@@ -43,6 +49,8 @@ public class ValueExpression extends BaseValue
 
     private void setExpressionPrivate(String string)
     {
+        this.text = string;
+
         try
         {
             if (string.isEmpty())
@@ -60,6 +68,8 @@ public class ValueExpression extends BaseValue
         {
             this.expression = null;
             this.lastError = true;
+
+            LOGGER.error("The expression was not read, so it was kept as text: " + e.getMessage());
         }
     }
 
@@ -72,12 +82,24 @@ public class ValueExpression extends BaseValue
     @Override
     public void fromData(BaseType data)
     {
+        if (!BaseType.isString(data))
+        {
+            LOGGER.error("The expression of this clip is not a string, so it was not read. Save this film now if you still have the original, because the next save writes it without the expression.");
+
+            return;
+        }
+
         this.setExpressionPrivate(data.asString());
     }
 
     @Override
     public String toString()
     {
-        return this.expression == null ? "" : this.expression.toString();
+        if (this.expression != null)
+        {
+            return this.expression.toString();
+        }
+
+        return this.text == null ? "" : this.text;
     }
 }
