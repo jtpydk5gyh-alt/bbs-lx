@@ -63,12 +63,17 @@ jobs:
       - name: Resolve the runtime classpath
         run: ./gradlew -I checks/cp-init.gradle printRuntimeCp
 
-      # Every checks/*Check.java is a check. Adding a file is enough to make
-      # it part of the build.
+      # Every checks/*.java is a check, except the benchmarks, which do not
+      # assert anything and would only make the build slower. The list is not
+      # spelled out because a name that does not end in "Check.java" would be
+      # left out of the build without anybody noticing.
       - name: Run the checks
         run: |
           cp="build/classes/java/main:build/classes/java/client:$(cat build/cp.txt)"
-          for check in checks/*Check.java; do
+          for check in checks/*.java; do
+            case "$check" in
+              *Bench.java) continue ;;
+            esac
             echo "::group::$check"
             java -cp "$cp" "$check"
             echo "::endgroup::"
