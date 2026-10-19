@@ -35,7 +35,12 @@ public class ValueFloat extends BaseValueNumber<Float>
     {
         if (data.isNumeric())
         {
-            this.value = data.asNumeric().floatValue();
+            float value = data.asNumeric().floatValue();
+
+            if (Float.isFinite(value))
+            {
+                this.value = this.clamp(value);
+            }
         }
     }
 

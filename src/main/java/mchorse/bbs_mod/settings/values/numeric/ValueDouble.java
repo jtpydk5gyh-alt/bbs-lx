@@ -35,7 +35,12 @@ public class ValueDouble extends BaseValueNumber<Double>
     {
         if (data.isNumeric())
         {
-            this.value = data.asNumeric().doubleValue();
+            double value = data.asNumeric().doubleValue();
+
+            if (Double.isFinite(value))
+            {
+                this.value = this.clamp(value);
+            }
         }
     }
 
