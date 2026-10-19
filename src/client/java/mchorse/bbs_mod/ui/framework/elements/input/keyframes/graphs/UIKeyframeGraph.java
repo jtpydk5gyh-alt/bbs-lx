@@ -562,7 +562,7 @@ public class UIKeyframeGraph implements IUIKeyframeGraph
                     {
                         float a = j / steps;
 
-                        segment.setup(prev, frame, prev.getTick() + a * (frame.getTick() - prev.getTick()));
+                        segment.setup(prev, frame, prev.getTick() + a * (frame.getTick() - prev.getTick()), i - 1);
 
                         float interpolate = this.toGraphY((float) frame.getFactory().getY(segment.createInterpolated()));
 

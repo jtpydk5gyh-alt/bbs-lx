@@ -9,7 +9,7 @@
     "block.bbs.chroma_black": "Fekete színtelítettség",
     "block.bbs.chroma_white": "Fehér színtelítettség",
     "item.bbs.gun": "BBS fegyver",
-    "itemGroup.bbs.main": "BBS mod",
+    "itemGroup.bbs.main": "BBS LX",
 
     "key.bbs.item_editor": "Tárgyszerkesztő",
     "key.bbs.dashboard": "Vezérlőpult",
@@ -20,5 +20,5 @@
     "key.bbs.record_replay": "Jelenlegi visszajátszás felvétele",
     "key.bbs.record_video": "Videó felvétele",
     "key.bbs.teleport": "Teleportálás a visszajátszáshoz",
-    "category.bbs.main": "BBS mod"
+    "category.bbs.main": "BBS LX"
 }

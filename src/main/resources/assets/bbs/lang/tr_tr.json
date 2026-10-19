@@ -9,7 +9,7 @@
     "block.bbs.chroma_black": "Siyah chroma",
     "block.bbs.chroma_white": "Beyaz chroma",
     "item.bbs.gun": "BBS silahı",
-    "itemGroup.bbs.main": "BBS mod",
+    "itemGroup.bbs.main": "BBS LX",
 
     "key.bbs.item_editor": "Eşya düzenleyicisi",
     "key.bbs.dashboard": "Gösterge paneli",
@@ -22,7 +22,7 @@
     "key.bbs.record_video": "Video kaydet",
     "key.bbs.teleport": "Seçili aktöre ışınlan",
     "key.bbs.zoom": "Yakınlaştır (BBS silahı)",
-    "category.bbs.main": "BBS mod",
+    "category.bbs.main": "BBS LX",
 
     "gamerule.bbsEditing": "BBS modun düzenleme izni"
 }

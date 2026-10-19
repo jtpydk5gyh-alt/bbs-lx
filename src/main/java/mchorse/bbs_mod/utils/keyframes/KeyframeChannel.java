@@ -8,6 +8,8 @@ import mchorse.bbs_mod.utils.CollectionUtils;
 import mchorse.bbs_mod.utils.interps.Interpolations;
 import mchorse.bbs_mod.utils.keyframes.factories.IKeyframeFactory;
 import mchorse.bbs_mod.utils.keyframes.factories.KeyframeFactories;
+import org.slf4j.Logger;
+import com.mojang.logging.LogUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +22,8 @@ import java.util.List;
  */
 public class KeyframeChannel <T> extends ValueList<Keyframe<T>>
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     private IKeyframeFactory<T> factory;
 
     public KeyframeChannel(String id, IKeyframeFactory<T> factory)
@@ -117,14 +121,14 @@ public class KeyframeChannel <T> extends ValueList<Keyframe<T>>
 
         if (size == 1 || ticks < prev.getTick())
         {
-            return new KeyframeSegment<>(prev, prev);
+            return new KeyframeSegment<>(prev, prev, 0);
         }
 
         Keyframe<T> last = this.list.get(size - 1);
 
         if (ticks >= last.getTick())
         {
-            return new KeyframeSegment<>(last, last);
+            return new KeyframeSegment<>(last, last, size - 1);
         }
 
         /* Use binary search to find the proper segment */
@@ -153,8 +157,9 @@ public class KeyframeChannel <T> extends ValueList<Keyframe<T>>
             b = this.list.get(low);
         }
 
-        Keyframe<T> a = low - 1 >= 0 ? this.list.get(low - 1) : b;
-        KeyframeSegment<T> segment = new KeyframeSegment<>(a, b);
+        int index = low - 1 >= 0 ? low - 1 : low;
+        Keyframe<T> a = this.list.get(index);
+        KeyframeSegment<T> segment = new KeyframeSegment<>(a, b, index);
 
         segment.setup(ticks);
 
@@ -357,7 +362,15 @@ public class KeyframeChannel <T> extends ValueList<Keyframe<T>>
         }
 
         MapType map = data.asMap();
-        IKeyframeFactory<T> factory = KeyframeFactories.FACTORIES.get(map.getString("type"));
+        String type = map.getString("type");
+        IKeyframeFactory<T> factory = KeyframeFactories.FACTORIES.get(type);
+
+        if (factory == null)
+        {
+            LOGGER.error("Dropping the keyframes of a channel of unknown type '{}'. Save this file now if you still have the original, because the next save writes it without these keyframes.", type);
+
+            return;
+        }
 
         this.factory = factory;
 

@@ -10,7 +10,7 @@
     "block.bbs.chroma_white": "ﺑﻠﻮﻙ ﻛﺮﻭﻡ ﺃﺑﻴﺾ",
 
     "item.bbs.gun": "ﺳﻼﺡ BBS",
-    "itemGroup.bbs.main": "ﻣﻮﺩ BBS",
+    "itemGroup.bbs.main": "BBS LX",
 
     "key.bbs.item_editor": "ﻣﺤﺮﺭ ﺍﻟﻌﻨﺎﺻﺮ",
     "key.bbs.dashboard": "ﻟﻮﺣﺔ ﺍﻟﺘﺤﻜﻢ",
@@ -24,7 +24,7 @@
     "key.bbs.teleport": "ﺍﻻﻧﺘﻘﺎﻝ ﺇﻟﻰ ﺍﻹﻋﺎﺩﺓ ﺍﻟﺤﺎﻟﻴﺔ",
     "key.bbs.zoom": "ﺗﻜﺒﻴﺮ (ﺳﻼﺡ BBS)",
 
-    "category.bbs.main": "ﻣﻮﺩ BBS",
+    "category.bbs.main": "BBS LX",
 
     "gamerule.bbsEditing": "ﺇﺫﻥ ﺍﻟﺘﻌﺪﻳﻞ ﻓﻲ ﻣﻮﺩ BBS"
 }
