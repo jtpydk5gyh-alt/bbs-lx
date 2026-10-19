@@ -1,5 +1,6 @@
 package mchorse.bbs_mod.actions;
 
+import com.mojang.logging.LogUtils;
 import mchorse.bbs_mod.BBSMod;
 import mchorse.bbs_mod.data.types.BaseType;
 import mchorse.bbs_mod.entity.ActorEntity;
@@ -20,6 +21,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +31,8 @@ import java.util.Map;
 public class ActionPlayer
 {
     public static final int MAX_DURATION = 20 * 60 * 60;
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     public Film film;
     public int tick;
@@ -165,12 +169,12 @@ public class ActionPlayer
 
     public void apply(LivingEntity actor, Replay replay, float tick, boolean ticking)
     {
-        double x = replay.keyframes.x.interpolate(tick);
-        double y = replay.keyframes.y.interpolate(tick);
-        double z = replay.keyframes.z.interpolate(tick);
-        float yawHead = replay.keyframes.headYaw.interpolate(tick).floatValue();
-        float yawBody = replay.keyframes.bodyYaw.interpolate(tick).floatValue();
-        float pitch = replay.keyframes.pitch.interpolate(tick).floatValue();
+        double x = MathUtils.finite(replay.keyframes.x.interpolate(tick), actor.getX());
+        double y = MathUtils.finite(replay.keyframes.y.interpolate(tick), actor.getY());
+        double z = MathUtils.finite(replay.keyframes.z.interpolate(tick), actor.getZ());
+        float yawHead = (float) MathUtils.finite(replay.keyframes.headYaw.interpolate(tick), actor.getYaw());
+        float yawBody = (float) MathUtils.finite(replay.keyframes.bodyYaw.interpolate(tick), actor.getBodyYaw());
+        float pitch = (float) MathUtils.finite(replay.keyframes.pitch.interpolate(tick), actor.getPitch());
 
         Vec3d pos = actor.getPos();
 
@@ -209,9 +213,9 @@ public class ActionPlayer
             actor.equipStack(EquipmentSlot.MAINHAND, replay.keyframes.mainHand.interpolate(tick, ItemStack.EMPTY));
         }
 
-        double vx = x - replay.keyframes.x.interpolate(tick - 1);
-        double vy = y - replay.keyframes.y.interpolate(tick - 1);
-        double vz = z - replay.keyframes.z.interpolate(tick - 1);
+        double vx = MathUtils.finite(x - replay.keyframes.x.interpolate(tick - 1), 0D);
+        double vy = MathUtils.finite(y - replay.keyframes.y.interpolate(tick - 1), 0D);
+        double vz = MathUtils.finite(z - replay.keyframes.z.interpolate(tick - 1), 0D);
 
         if (vy == 0D)
         {
@@ -220,7 +224,7 @@ public class ActionPlayer
 
         actor.setVelocity(vx, vy, vz);
 
-        actor.fallDistance = replay.keyframes.fall.interpolate(tick).floatValue();
+        actor.fallDistance = (float) MathUtils.finite(replay.keyframes.fall.interpolate(tick), 0D);
     }
 
     public boolean tick()
@@ -286,7 +290,18 @@ public class ActionPlayer
 
     public void syncData(DataPath key, BaseType data)
     {
-        BaseValue baseValue = this.film.getRecursively(key);
+        BaseValue baseValue;
+
+        try
+        {
+            baseValue = this.film.getRecursively(key);
+        }
+        catch (Exception e)
+        {
+            LOGGER.warn("The path '" + key + "' of the film '" + this.film.getId() + "' was not found, so nothing was changed.");
+
+            return;
+        }
 
         if (baseValue != null)
         {

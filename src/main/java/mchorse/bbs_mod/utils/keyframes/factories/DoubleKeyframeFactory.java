@@ -12,7 +12,14 @@ public class DoubleKeyframeFactory implements IKeyframeFactory<Double>
     @Override
     public Double fromData(BaseType data)
     {
-        return data.isNumeric() ? data.asNumeric().doubleValue() : 0D;
+        if (!data.isNumeric())
+        {
+            return 0D;
+        }
+
+        double value = data.asNumeric().doubleValue();
+
+        return Double.isFinite(value) ? value : 0D;
     }
 
     @Override
