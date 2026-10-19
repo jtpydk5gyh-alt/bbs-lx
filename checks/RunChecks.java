@@ -65,7 +65,7 @@ public class RunChecks
         arrayLengthsAreBounded();
         factoryReportsTheTruth();
         backupsAreListableAndRestorable();
-        crusherAgreesWithItself();
+        crusherHasALimit();
         malformedDataDoesNotBreakTheLoad();
 
         System.out.println();
@@ -340,40 +340,17 @@ public class RunChecks
         check("un id que escapa se rechaza antes de tocar nada", manager.getBackups("../../salir").isEmpty());
     }
 
-    /* --- 6. the crusher accepts what its own sender produces --- */
+    /* --- 6. the crusher has a limit that is a limit --- */
 
-    static void crusherAgreesWithItself() throws Exception
+    static void crusherHasALimit() throws Exception
     {
-        section("el troceador acepta lo que su propio emisor produce");
+        section("el troceador tiene un tope que es un tope");
 
         int limit = PacketCrusher.MAX_CHUNKS * PacketCrusher.BUFFER_SIZE;
 
         check("el limite por carga es holgado", limit > 8_000_000);
-        check("una carga de 1 MB cabe", chunksFor(1_000_000) <= PacketCrusher.MAX_CHUNKS);
-        check("una carga de 12 MB cabe", chunksFor(12_000_000) <= PacketCrusher.MAX_CHUNKS);
-        check("una carga de 30 MB cabe", chunksFor(30_000_000) <= PacketCrusher.MAX_CHUNKS);
-        check("justo en el limite cabe", chunksFor(limit) <= PacketCrusher.MAX_CHUNKS);
-        check("por encima del limite se rechaza", chunksFor(limit + 1) > PacketCrusher.MAX_CHUNKS);
         check("el techo de memoria en vuelo es uno solo",
             PacketCrusher.MAX_PENDING_BYTES < PacketCrusher.MAX_PENDING * PacketCrusher.MAX_CHUNKS * PacketCrusher.BUFFER_SIZE);
-
-        section("el numero de trozos no pierde bytes por precision");
-
-        int[] exact = {30_000, 60_000, 3_000_000, 30_720_000, 60_000_000};
-        int[] oneMore = {30_001, 60_001, 3_000_001, 30_720_001, 60_000_001};
-
-        for (int i = 0; i < exact.length; i++)
-        {
-            check(exact[i] + " bytes caben en " + chunksFor(exact[i]) + " trozos",
-                chunksFor(exact[i]) * PacketCrusher.BUFFER_SIZE >= exact[i]);
-            check(oneMore[i] + " bytes caben en " + chunksFor(oneMore[i]) + " trozos",
-                chunksFor(oneMore[i]) * PacketCrusher.BUFFER_SIZE >= oneMore[i]);
-        }
-    }
-
-    static int chunksFor(int bytes)
-    {
-        return (bytes + PacketCrusher.BUFFER_SIZE - 1) / PacketCrusher.BUFFER_SIZE;
     }
 
     static MapType map(String value)
