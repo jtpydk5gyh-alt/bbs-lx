@@ -48,4 +48,4 @@ Because this mod renders, handles input and patches Minecraft internals with mix
 * [BBS mod on Modrinth](https://modrinth.com/mod/bbs-mod/) and on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/bbs-mod), for the reference pages.
 * Everyone listed in the `authors` and `contributors` blocks of `fabric.mod.json`, and the translators whose work ships in the assets.
 
-The attribution in `fabric.mod.json` is left exactly as upstream wrote it.
+The attribution in `fabric.mod.json` — the authors, the contributors and the contact — is left exactly as upstream wrote it. Only the name and the description are this fork's.
