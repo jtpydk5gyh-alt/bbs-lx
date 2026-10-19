@@ -1,0 +1,25 @@
+/* Resolves the runtime classpath of the mod so that the checks can be run
+   outside the game. It lives outside build.gradle on purpose: Gradle is a
+   protected area and this file changes nothing about how the mod is built.
+
+   Usage:  ./gradlew -I checks/cp-init.gradle printRuntimeCp
+   Result: build/cp.txt holds the classpath, one path per entry, separated by ; */
+
+allprojects
+{
+    tasks.register("printRuntimeCp")
+    {
+        doLast
+        {
+            def files = []
+
+            files.addAll(project.sourceSets.main.runtimeClasspath.files)
+            files.addAll(project.sourceSets.client.runtimeClasspath.files)
+
+            def all = files.collect { it.absolutePath }.unique().join(";")
+
+            new File(project.rootDir, "build/cp.txt").text = all
+            println "CLASSPATH_WRITTEN:" + all.split(";").length + " entradas"
+        }
+    }
+}
