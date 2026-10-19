@@ -1,7 +1,7 @@
 {
     "block.bbs.model": "โมเดลบล็อก",
     "item.bbs.gun": "ปืน BBS",
-    "itemGroup.bbs.main": "BBS|บีบีเอส ม็อด",
+    "itemGroup.bbs.main": "BBS LX",
 
     "key.bbs.item_editor": "ตัวแก้ไขไอเทม",
     "key.bbs.dashboard": "แดชบอร์ด",
@@ -12,5 +12,5 @@
     "key.bbs.record_replay": "บันทึกรีเพลย์ปัจจุบัน",
     "key.bbs.record_video": "บันทึกวิดิโอ",
     "key.bbs.teleport": "โทรพอร์ตไปยังรีเพลย์ปัจจุบัน",
-    "category.bbs.main": "BBS|บีบีเอส ม็อด"
+    "category.bbs.main": "BBS LX"
 }

@@ -28,22 +28,39 @@ public class KeyframeSegment <T>
         this.fill(a, b);
     }
 
+    public KeyframeSegment(Keyframe<T> a, Keyframe<T> b, int index)
+    {
+        this.fill(a, b, index);
+    }
+
     public void setup(Keyframe<T> a, Keyframe<T> b, float ticks)
     {
         this.fill(a, b);
         this.setup(ticks);
     }
 
+    public void setup(Keyframe<T> a, Keyframe<T> b, float ticks, int index)
+    {
+        this.fill(a, b, index);
+        this.setup(ticks);
+    }
+
     public void fill(Keyframe<T> a, Keyframe<T> b)
+    {
+        KeyframeChannel<T> channel = (KeyframeChannel<T>) a.getParent();
+        int index = channel == null ? -1 : channel.getKeyframes().indexOf(a);
+
+        this.fill(a, b, index);
+    }
+
+    public void fill(Keyframe<T> a, Keyframe<T> b, int index)
     {
         this.a = a;
         this.b = b;
 
-        KeyframeChannel<T> channel = (KeyframeChannel<T>) a.getParent();
-        int index = channel.getKeyframes().indexOf(a);
-
         if (index >= 0)
         {
+            KeyframeChannel<T> channel = (KeyframeChannel<T>) a.getParent();
             Keyframe<T> preA = channel.get(index - 1);
             Keyframe<T> postB = channel.get(index + 2);
 

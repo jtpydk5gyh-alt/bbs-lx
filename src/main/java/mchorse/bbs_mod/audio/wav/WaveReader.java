@@ -16,7 +16,8 @@ import java.util.List;
  */
 public class WaveReader extends BinaryReader
 {
-    public static final int MAX_CHUNK = 1 << 27;
+    public static final int MAX_CHUNK = 1 << 28;
+    public static final int MAX_ENTRIES = 4096;
 
     public Wave read(InputStream stream) throws Exception
     {
@@ -73,14 +74,12 @@ public class WaveReader extends BinaryReader
                     }
                     else if (chunk.id.equals("data"))
                     {
-                        data = new byte[chunk.size];
-                        stream.read(data);
+                        data = this.readData(stream, chunk.size);
                     }
                     /* https://www.recordingblogs.com/wiki/list-chunk-of-a-wave-file */
                     else if (chunk.id.equals("LIST"))
                     {
-                        byte[] listData = new byte[chunk.size];
-                        stream.read(listData);
+                        byte[] listData = this.readData(stream, chunk.size);
 
                         try
                         {
@@ -89,6 +88,11 @@ public class WaveReader extends BinaryReader
 
                             while (bytes.available() > 0)
                             {
+                                if (list.entries.size() >= MAX_ENTRIES)
+                                {
+                                    throw new EOFException("Refusing more than " + MAX_ENTRIES + " entries in a LIST chunk");
+                                }
+
                                 String id = this.readFourString(bytes);
                                 int size = this.readInt(bytes);
 
@@ -116,12 +120,16 @@ public class WaveReader extends BinaryReader
                     /* https://www.recordingblogs.com/wiki/cue-chunk-of-a-wave-file */
                     else if (chunk.id.equals("cue "))
                     {
-                        byte[] cueData = new byte[chunk.size];
-                        stream.read(cueData);
+                        byte[] cueData = this.readData(stream, chunk.size);
 
                         ByteArrayInputStream bytes = new ByteArrayInputStream(cueData);
 
                         int cuesCount = this.readInt(bytes);
+
+                        if (cuesCount < 0 || cuesCount > MAX_ENTRIES)
+                        {
+                            throw new EOFException("Refusing " + cuesCount + " cues, the limit is " + MAX_ENTRIES);
+                        }
 
                         while (cuesCount > 0)
                         {
@@ -174,6 +182,49 @@ public class WaveReader extends BinaryReader
     private void log(String s)
     {
         // System.out.println(s);
+    }
+
+    /**
+     * Read the data of a chunk. A chunk says how big it is, but the file may
+     * be shorter than that, and then the missing part is not read at all: it
+     * is not reserved either, so a file of a few bytes that says it has a
+     * hundred megabytes of audio does not make the game reserve a hundred
+     * megabytes.
+     */
+    private byte[] readData(InputStream stream, int size) throws Exception
+    {
+        int available = stream.available();
+
+        if (available > 0 && available < size)
+        {
+            size = available;
+        }
+
+        byte[] data = new byte[size];
+        int offset = 0;
+
+        while (offset < size)
+        {
+            int read = stream.read(data, offset, size - offset);
+
+            if (read <= 0)
+            {
+                break;
+            }
+
+            offset += read;
+        }
+
+        if (offset == size)
+        {
+            return data;
+        }
+
+        byte[] shorter = new byte[offset];
+
+        System.arraycopy(data, 0, shorter, 0, offset);
+
+        return shorter;
     }
 
     public BinaryChunk readChunk(InputStream stream) throws Exception

@@ -1,6 +1,6 @@
 {
     "block.bbs.model": "Model Blok",
-    "itemGroup.bbs.main": "Mod BBS",
+    "itemGroup.bbs.main": "BBS LX",
 
     "key.bbs.dashboard": "Dasbor",
     "key.bbs.demorph": "Demorph",
@@ -9,5 +9,5 @@
     "key.bbs.play_film": "Putar film",
     "key.bbs.record_replay": "Rekam ulang rekaman saat ini",
     "key.bbs.record_video": "Rekam video",
-    "category.bbs.main": "Mod BBS"
+    "category.bbs.main": "BBS LX"
 }

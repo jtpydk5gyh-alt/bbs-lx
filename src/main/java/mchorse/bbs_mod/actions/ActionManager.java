@@ -1,5 +1,6 @@
 package mchorse.bbs_mod.actions;
 
+import com.mojang.logging.LogUtils;
 import mchorse.bbs_mod.actions.types.ActionClip;
 import mchorse.bbs_mod.data.types.BaseType;
 import mchorse.bbs_mod.film.Film;
@@ -10,6 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +22,8 @@ import java.util.function.Supplier;
 
 public class ActionManager
 {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     private List<ActionPlayer> players = new ArrayList<>();
     private Map<ServerPlayerEntity, ActionRecorder> recorders = new HashMap<>();
     private Map<ServerWorld, DamageControl> dc = new HashMap<>();
@@ -35,7 +39,25 @@ public class ActionManager
     {
         this.players.removeIf((player) ->
         {
-            boolean tick = player.tick();
+            boolean tick;
+
+            try
+            {
+                tick = player.tick();
+            }
+            catch (Exception e)
+            {
+                LOGGER.error("Failed to play the film " + player.film.getId(), e);
+
+                if (player.stopDamage)
+                {
+                    this.stopDamage(player.getWorld());
+                }
+
+                player.stop();
+
+                return true;
+            }
 
             if (tick)
             {

@@ -73,6 +73,13 @@ public class MathClip extends ComponentClip
         this.varFov = this.builder.register("fov");
     }
 
+    private static double value(IExpression expression, double previous)
+    {
+        double value = expression.get().doubleValue();
+
+        return Double.isFinite(value) ? value : previous;
+    }
+
     @Override
     public void applyClip(ClipContext context, Position position)
     {
@@ -104,43 +111,43 @@ public class MathClip extends ComponentClip
             if (this.isActive(0))
             {
                 this.varValue.set(position.point.x);
-                position.point.x = expression.get().doubleValue();
+                position.point.x = this.value(expression, position.point.x);
             }
 
             if (this.isActive(1))
             {
                 this.varValue.set(position.point.y);
-                position.point.y = expression.get().doubleValue();
+                position.point.y = this.value(expression, position.point.y);
             }
 
             if (this.isActive(2))
             {
                 this.varValue.set(position.point.z);
-                position.point.z = expression.get().doubleValue();
+                position.point.z = this.value(expression, position.point.z);
             }
 
             if (this.isActive(3))
             {
                 this.varValue.set(position.angle.yaw);
-                position.angle.yaw = (float) expression.get().doubleValue();
+                position.angle.yaw = (float) this.value(expression, position.angle.yaw);
             }
 
             if (this.isActive(4))
             {
                 this.varValue.set(position.angle.pitch);
-                position.angle.pitch = (float) expression.get().doubleValue();
+                position.angle.pitch = (float) this.value(expression, position.angle.pitch);
             }
 
             if (this.isActive(5))
             {
                 this.varValue.set(position.angle.roll);
-                position.angle.roll = (float) expression.get().doubleValue();
+                position.angle.roll = (float) this.value(expression, position.angle.roll);
             }
 
             if (this.isActive(6))
             {
                 this.varValue.set(position.angle.fov);
-                position.angle.fov = (float) expression.get().doubleValue();
+                position.angle.fov = (float) this.value(expression, position.angle.fov);
             }
         }
     }
