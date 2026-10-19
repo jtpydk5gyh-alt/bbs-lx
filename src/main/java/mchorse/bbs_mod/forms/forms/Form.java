@@ -133,6 +133,22 @@ public abstract class Form extends ValueGroup
         this.renderer = renderer;
     }
 
+    /**
+     * How many overlays of the given name the data has. They are numbered
+     * from zero and without holes.
+     */
+    protected int countOverlays(MapType map, String prefix)
+    {
+        int count = 0;
+
+        while (map.has(prefix + count))
+        {
+            count += 1;
+        }
+
+        return count;
+    }
+
     public Form getParentForm()
     {
         BaseValue parentValue = this.getParent();
@@ -339,6 +355,19 @@ public abstract class Form extends ValueGroup
     {
         if (data instanceof MapType map)
         {
+            /* The overlays that were recorded are kept, even when the setting
+               says there are less of them now, because the next save writes
+               the form without the ones that are missing. */
+            int count = this.countOverlays(map, "transform_overlay");
+
+            for (int i = this.additionalTransforms.size(); i < count; i++)
+            {
+                ValueTransform valueTransform = new ValueTransform("transform_overlay" + i, new Transform());
+
+                this.additionalTransforms.add(valueTransform);
+                this.add(valueTransform);
+            }
+
             /* Compatibility with older forms */
             if (map.has("bodyParts") && !map.has("parts"))
             {
