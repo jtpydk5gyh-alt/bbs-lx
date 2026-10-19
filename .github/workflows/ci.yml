@@ -63,10 +63,16 @@ jobs:
       - name: Resolve the runtime classpath
         run: ./gradlew -I checks/cp-init.gradle printRuntimeCp
 
+      # Every checks/*Check.java is a check. Adding a file is enough to make
+      # it part of the build.
       - name: Run the checks
         run: |
-          java -cp "build/classes/java/main:build/classes/java/client:$(cat build/cp.txt)" checks/RunChecks.java
-          java -cp "build/classes/java/main:build/classes/java/client:$(cat build/cp.txt)" checks/SegmentCheck.java
+          cp="build/classes/java/main:build/classes/java/client:$(cat build/cp.txt)"
+          for check in checks/*Check.java; do
+            echo "::group::$check"
+            java -cp "$cp" "$check"
+            echo "::endgroup::"
+          done
 
   public-surface:
     name: public surface
