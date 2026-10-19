@@ -25,6 +25,9 @@ import java.util.Scanner;
 
 public class IOUtils
 {
+    public static final int MAX_LINES = 1 << 20;
+    public static final int MAX_TOTAL_LENGTH = 1 << 26;
+
     public static String readText(File file) throws FileNotFoundException
     {
         return readText(new FileInputStream(file));
@@ -103,11 +106,12 @@ public class IOUtils
     }
 
     /**
-     * Read all lines from a file (needs a text file) 
+     * Read all lines from a file (needs a text file)
      */
     public static List<String> readLines(InputStream stream) throws Exception
     {
         List<String> list = new ArrayList<>();
+        long total = 0;
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8)))
         {
@@ -115,6 +119,18 @@ public class IOUtils
 
             while ((line = br.readLine()) != null)
             {
+                if (list.size() >= MAX_LINES)
+                {
+                    throw new IOException("This file has more than " + MAX_LINES + " lines.");
+                }
+
+                total += line.length();
+
+                if (total > MAX_TOTAL_LENGTH)
+                {
+                    throw new IOException("This file has more than " + MAX_TOTAL_LENGTH + " characters.");
+                }
+
                 list.add(line);
             }
         }

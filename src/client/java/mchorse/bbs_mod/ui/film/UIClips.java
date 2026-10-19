@@ -61,6 +61,7 @@ public class UIClips extends UIElement
 
     private static final int MARGIN = 10;
     private static final int LAYER_HEIGHT = 20;
+    public static final int MAX_LAYERS = 512;
 
     private static final Area CLIP_AREA = new Area();
 
@@ -908,6 +909,11 @@ public class UIClips extends UIElement
         {
             this.layers = Math.max(this.layers, clip.layer.get() + 1);
         }
+
+        if (this.layers > MAX_LAYERS)
+        {
+            this.layers = MAX_LAYERS;
+        }
     }
 
     public int fromGraphX(int mouseX)
@@ -1408,8 +1414,20 @@ public class UIClips extends UIElement
 
         while (this.collisionExists(others, data, dx, dy))
         {
-            if (dir % 2 == 0 && dx != 0) dx -= Integer.signum(dx);
-            if (dir % 2 == 1 && dy != 0) dy -= Integer.signum(dy);
+            if (dir % 2 == 0 && dx != 0)
+            {
+                dx -= Integer.signum(dx);
+            }
+
+            if (dir % 2 == 1 && dy != 0)
+            {
+                dy -= Integer.signum(dy);
+            }
+
+            if (dx == 0 && dy == 0)
+            {
+                break;
+            }
 
             dir += 1;
         }

@@ -1,7 +1,7 @@
 {
     "block.bbs.model": "Bloque de modelos",
     "item.bbs.gun": "Pistola BBS",
-    "itemGroup.bbs.main": "BBS mod",
+    "itemGroup.bbs.main": "BBS LX",
 
     "key.bbs.item_editor": "Editor de items",
     "key.bbs.dashboard": "Tablero principal",
@@ -12,5 +12,5 @@
     "key.bbs.record_replay": "Grabar reproducción actual",
     "key.bbs.record_video": "Grabar vídeo",
     "key.bbs.teleport": "Teletransportarse a la reproducción actual",
-    "category.bbs.main": "BBS mod"
+    "category.bbs.main": "BBS LX"
 }

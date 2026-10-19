@@ -114,7 +114,7 @@ public abstract class PacketCrusher
             bytes = new byte[]{69};
         }
 
-        int total = Math.max((int) Math.ceil(bytes.length / (float) BUFFER_SIZE), 1);
+        int total = (bytes.length + BUFFER_SIZE - 1) / BUFFER_SIZE;
         int counter = this.counter;
 
         if (total > MAX_CHUNKS)

@@ -252,7 +252,16 @@ public class UIClipsPanel extends UIElement implements IUIClipsDelegate
 
         for (Clip clip : this.clips.getClipsFromSelection())
         {
-            BaseValue value = clip.getRecursively(path);
+            BaseValue value;
+
+            try
+            {
+                value = clip.getRecursively(path);
+            }
+            catch (IllegalStateException e)
+            {
+                continue;
+            }
 
             if (value != null && value.getClass() == property.getClass())
             {

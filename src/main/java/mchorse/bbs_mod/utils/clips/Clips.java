@@ -19,6 +19,8 @@ import java.util.List;
 
 public class Clips extends ValueGroup
 {
+    public static final int MAX_CLIPS = 1024;
+
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private List<Clip> clips = new ArrayList<>();
@@ -329,8 +331,24 @@ public class Clips extends ValueGroup
     {
         this.clips.clear();
 
+        if (!BaseType.isList(base))
+        {
+            LOGGER.error("The camera of this film is not a list of clips, so it was not read. Save this film now if you still have the original, because the next save writes it without these clips.");
+
+            this.sync();
+
+            return;
+        }
+
         for (BaseType type : base.asList())
         {
+            if (this.clips.size() >= MAX_CLIPS)
+            {
+                LOGGER.error("This group of clips has more than " + MAX_CLIPS + " clips and the rest were not read. Save this film now if you still have the original, because the next save writes it without the rest.");
+
+                break;
+            }
+
             if (!type.isMap())
             {
                 continue;
