@@ -113,7 +113,7 @@ public class MolangParser extends MathBuilder
     @Override
     protected Variable getVariable(String name)
     {
-        if (name.charAt(1) == '.')
+        if (name.length() > 1 && name.charAt(1) == '.')
         {
             if (name.charAt(0) == 'q')
             {
@@ -228,6 +228,11 @@ public class MolangParser extends MathBuilder
      */
     public MolangExpression parseExpression(String expression) throws MolangException
     {
+        if (expression.length() > MAX_LENGTH)
+        {
+            throw new MolangException("Given expression is " + expression.length() + " characters long, the limit is " + MAX_LENGTH);
+        }
+
         List<String> lines = new ArrayList<>();
 
         for (String split : expression.toLowerCase().trim().split(";"))

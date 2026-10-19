@@ -17,7 +17,10 @@ public class ShapeKeysKeyframeFactory implements IKeyframeFactory<ShapeKeys>
     {
         ShapeKeys keys = new ShapeKeys();
 
-        keys.fromData(data.asMap());
+        if (data.isMap())
+        {
+            keys.fromData(data.asMap());
+        }
 
         return keys;
     }

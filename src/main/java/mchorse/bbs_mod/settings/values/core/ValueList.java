@@ -5,6 +5,8 @@ import mchorse.bbs_mod.data.types.ListType;
 import mchorse.bbs_mod.settings.values.base.BaseValue;
 import mchorse.bbs_mod.settings.values.base.BaseValueGroup;
 import mchorse.bbs_mod.utils.CollectionUtils;
+import org.slf4j.Logger;
+import com.mojang.logging.LogUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +14,10 @@ import java.util.List;
 
 public abstract class ValueList <T extends BaseValue> extends BaseValueGroup
 {
+    public static final int MAX_ELEMENTS = 1 << 16;
+
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     protected final List<T> list = new ArrayList<T>();
 
     public ValueList(String id)
@@ -132,13 +138,29 @@ public abstract class ValueList <T extends BaseValue> extends BaseValueGroup
         }
 
         ListType list = data.asList();
+        int max = this.getMaxElements();
+        int size = Math.min(list.size(), max);
 
-        for (int i = 0; i < list.size(); i++)
+        if (size < list.size())
+        {
+            LOGGER.error("This list has " + list.size() + " elements and only the first " + size + " were read. Save this file now if you still have the original, because the next save writes it without the rest.");
+        }
+
+        for (int i = 0; i < size; i++)
         {
             T value = this.create(String.valueOf(i));
 
             this.add(value);
             value.fromData(list.get(i));
         }
+    }
+
+    /**
+     * How many elements of this list can be read. A list that is read from
+     * user data cannot have as many elements as it wants.
+     */
+    protected int getMaxElements()
+    {
+        return MAX_ELEMENTS;
     }
 }

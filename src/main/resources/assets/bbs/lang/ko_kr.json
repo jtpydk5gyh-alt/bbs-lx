@@ -9,7 +9,7 @@
     "block.bbs.chroma_black": "검은색 크로마",
     "block.bbs.chroma_white": "하얀색 크로마",
     "item.bbs.gun": "BBS gun",
-    "itemGroup.bbs.main": "BBS mod",
+    "itemGroup.bbs.main": "BBS LX",
 
     "key.bbs.item_editor": "아이템 편집",
     "key.bbs.dashboard": "대쉬보드",
@@ -22,7 +22,7 @@
     "key.bbs.record_video": "영상 녹화",
     "key.bbs.teleport": "녹화 위치로 텔레포트",
     "key.bbs.zoom": "Zoom (BBS gun)",
-    "category.bbs.main": "BBS mod",
+    "category.bbs.main": "BBS LX",
 
     "gamerule.bbsEditing": "BBS mod's editing permission"
 }

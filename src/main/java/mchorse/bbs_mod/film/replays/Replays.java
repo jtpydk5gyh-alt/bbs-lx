@@ -5,9 +5,17 @@ import mchorse.bbs_mod.utils.CollectionUtils;
 
 public class Replays extends ValueList<Replay>
 {
+    public static final int MAX_REPLAYS = 256;
+
     public Replays(String id)
     {
         super(id);
+    }
+
+    @Override
+    protected int getMaxElements()
+    {
+        return MAX_REPLAYS;
     }
 
     public Replay addReplay()

@@ -12,8 +12,8 @@ public class VanillaParticleForm extends Form
     public final ValueBoolean paused = new ValueBoolean("paused", false);
     public final ValueBoolean local = new ValueBoolean("local", false);
     public final ValueFloat velocity = new ValueFloat("velocity", 0.1F);
-    public final ValueInt count = new ValueInt("count", 5);
-    public final ValueInt frequency = new ValueInt("frequency", 5);
+    public final ValueInt count = new ValueInt("count", 5, 0, 1024);
+    public final ValueInt frequency = new ValueInt("frequency", 5, 0, 1024);
     public final ValueFloat scatteringYaw = new ValueFloat("scattering_yaw", 0F);
     public final ValueFloat scatteringPitch = new ValueFloat("scattering_pitch", 0F);
     public final ValueFloat offsetX = new ValueFloat("offset_x", 0F);

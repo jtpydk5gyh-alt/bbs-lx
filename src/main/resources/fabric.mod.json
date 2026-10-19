@@ -2,8 +2,8 @@
     "schemaVersion": 1,
     "id": "bbs",
     "version": "${version}",
-    "name": "BBS mod",
-    "description": "A new generation of video production mod",
+    "name": "BBS LX",
+    "description": "An animation studio for Minecraft: build a scene, animate it, preview it, and export it to video with sound. Forked from BBS mod by McHorse.",
     "authors": [
         "McHorse"
     ],

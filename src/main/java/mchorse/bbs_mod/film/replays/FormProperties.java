@@ -133,7 +133,7 @@ public class FormProperties extends ValueGroup
 
             if (property == null)
             {
-                return;
+                continue;
             }
 
             property.setRuntimeValue(null);

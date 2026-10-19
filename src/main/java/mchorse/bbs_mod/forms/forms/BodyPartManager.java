@@ -5,9 +5,17 @@ import mchorse.bbs_mod.settings.values.core.ValueList;
 
 public class BodyPartManager extends ValueList<BodyPart>
 {
+    public static final int MAX_BODY_PARTS = 256;
+
     public BodyPartManager(String id)
     {
         super(id);
+    }
+
+    @Override
+    protected int getMaxElements()
+    {
+        return MAX_BODY_PARTS;
     }
 
     public Form getOwner()
